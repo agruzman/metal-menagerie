@@ -137,4 +137,23 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(
     `  Payments: ${live ? 'Stripe' : 'DEMO MODE (no card is charged — add STRIPE_SECRET_KEY to .env to go live)'}\n`
   );
+  keepAwake();
 });
+
+/**
+ * Free hosting puts the server to sleep after 15 idle minutes, and the next
+ * visitor then waits half a minute staring at a loading screen. Requesting
+ * our own public address every 10 minutes counts as traffic and prevents it
+ * — no outside service needed. Only runs when hosted (https), never on a
+ * laptop. Set KEEP_AWAKE=0 to switch it off.
+ */
+function keepAwake() {
+  if (!BEHIND_HTTPS || process.env.KEEP_AWAKE === '0' || typeof fetch !== 'function') return;
+  const every = 10 * 60 * 1000;
+  setInterval(() => {
+    fetch(`${BASE_URL}/healthz`, { signal: AbortSignal.timeout(20_000) })
+      .then((r) => { if (!r.ok) console.warn(`[keep-awake] /healthz answered ${r.status}`); })
+      .catch((err) => console.warn('[keep-awake] ping failed:', err.message));
+  }, every).unref();
+  console.log(`  Keep-awake: pinging ${BASE_URL}/healthz every 10 minutes\n`);
+}

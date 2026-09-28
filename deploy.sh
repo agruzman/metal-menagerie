@@ -86,10 +86,12 @@ fi
 note "done"
 
 # ---------------------------------------------------------------- 2. Turso
-if ! turso auth whoami >/dev/null 2>&1; then
+# The CLI exits 0 even when not logged in, so look at what it says, not its status.
+if turso auth whoami 2>&1 | grep -qi "not logged in"; then
   bold "Sign in to Turso (a browser tab opens — click Authorize)"
   turso auth login || turso auth signup
 fi
+turso auth whoami 2>&1 | grep -qi "not logged in" && fail "Turso sign-in did not complete. Run:  turso auth login   then re-run this script."
 
 bold "Creating the database on Turso"
 # Oregon, to sit next to the Render service in the same region.
@@ -97,6 +99,10 @@ turso group create default --location aws-us-west-2 >/dev/null 2>&1 || true
 turso db show "$REPO_NAME" >/dev/null 2>&1 || turso db create "$REPO_NAME" >/dev/null
 TURSO_URL="$(turso db show "$REPO_NAME" --url)"
 TURSO_TOKEN="$(turso db tokens create "$REPO_NAME")"
+case "$TURSO_URL" in
+  libsql://*) ;;
+  *) fail "Turso did not return a database URL (got: $TURSO_URL). Run:  turso auth login   and re-run." ;;
+esac
 note "done"
 
 # ------------------------------------------------------------- 3. Render
