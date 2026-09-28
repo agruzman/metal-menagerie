@@ -1,0 +1,20 @@
+<%- include('partials/head', { title: 'Shop' }) %>
+
+<div class="wrap section">
+  <h1>The whole flock</h1>
+  <p class="muted" style="margin-bottom:40px;max-width:56ch">
+    <%= settings.intro %>
+  </p>
+
+  <div class="grid">
+    <% products.forEach(function (p) { %>
+      <%- include('partials/card', { p: p }) %>
+    <% }) %>
+  </div>
+
+  <% if (products.length === 0) { %>
+    <div class="empty">Nothing listed yet.</div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

@@ -1,0 +1,34 @@
+<%- include('../partials/admin_head', { title: 'Orders' }) %>
+
+<div class="toolbar">
+  <h1 style="font-size:1.6rem;margin:0">Orders</h1>
+  <span class="sp"></span>
+  <a class="btn ghost small <%= status === '' ? 'on' : '' %>" href="/admin/orders">All</a>
+  <a class="btn ghost small" href="/admin/orders?status=paid">To ship</a>
+  <a class="btn ghost small" href="/admin/orders?status=shipped">Shipped</a>
+  <a class="btn ghost small" href="/admin/orders?status=pending">Unfinished</a>
+</div>
+
+<div class="panel">
+  <table class="data">
+    <thead>
+      <tr><th>Order</th><th>Date</th><th>Customer</th><th>Ship to</th><th>Total</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% items.forEach(function (o) { %>
+        <tr>
+          <td><a class="mono" href="/admin/orders/<%= o.id %>"><%= o.ref %></a></td>
+          <td class="small muted"><%= o.created_at %></td>
+          <td><%= o.customer_name || '—' %><div class="small muted"><%= o.email %></div></td>
+          <td class="small muted"><%= [o.address.city, o.address.country].filter(Boolean).join(', ') || '—' %></td>
+          <td><%= money(o.total_cents) %></td>
+          <td><span class="pill <%= o.status %>"><%= o.status %></span></td>
+          <td class="right"><a class="btn ghost small" href="/admin/orders/<%= o.id %>">Open</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% if (!items.length) { %><p class="muted small">Nothing here.</p><% } %>
+</div>
+
+<%- include('../partials/admin_foot') %>

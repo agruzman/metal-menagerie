@@ -1,0 +1,97 @@
+<%- include('../partials/admin_head', { title: 'Order ' + order.ref }) %>
+
+<div class="toolbar">
+  <h1 style="font-size:1.5rem;margin:0" class="mono"><%= order.ref %></h1>
+  <span class="pill <%= order.status %>"><%= order.status %></span>
+  <span class="sp"></span>
+  <a class="btn ghost small" href="/admin/orders">← All orders</a>
+</div>
+
+<div style="display:grid;grid-template-columns:1.4fr 1fr;gap:24px" class="order-grid">
+  <div>
+    <div class="panel">
+      <h2>Items</h2>
+      <table class="data">
+        <tbody>
+          <% order.items.forEach(function (i) { %>
+            <tr>
+              <td style="width:58px"><img class="mini" src="<%= i.image || '/uploads/group.jpg' %>" alt=""></td>
+              <td><%= i.name %><div class="small muted"><%= i.qty %> × <%= money(i.price_cents) %></div></td>
+              <td class="right"><%= money(i.price_cents * i.qty) %></td>
+            </tr>
+          <% }) %>
+          <tr><td colspan="2">Subtotal</td><td class="right"><%= money(order.subtotal_cents) %></td></tr>
+          <tr><td colspan="2"><%= order.shipping_label || 'Shipping' %></td><td class="right"><%= money(order.shipping_cents) %></td></tr>
+          <tr><td colspan="2"><strong>Total</strong></td><td class="right"><strong><%= money(order.total_cents) %></strong></td></tr>
+        </tbody>
+      </table>
+      <p class="small muted" style="margin-top:14px">
+        Paid via <%= order.provider %><% if (order.provider_ref) { %> · <span class="mono"><%= order.provider_ref %></span><% } %>
+        <% if (order.paid_at) { %> · <%= order.paid_at %><% } %>
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Update</h2>
+      <form method="post" action="/admin/orders/<%= order.id %>">
+        <div class="two">
+          <div class="field">
+            <label>Status</label>
+            <select name="status">
+              <% ['pending','paid','shipped','cancelled','refunded'].forEach(function (s) { %>
+                <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
+              <% }) %>
+            </select>
+            <div class="hint">Marking as <em>shipped</em> emails the buyer their tracking number.
+              Cancelling or refunding puts the items back into stock.</div>
+          </div>
+          <div class="field">
+            <label>Tracking number</label>
+            <input type="text" name="tracking" value="<%= order.tracking %>">
+          </div>
+        </div>
+        <div class="field">
+          <label>Private notes</label>
+          <textarea name="notes" style="min-height:80px"><%= order.notes %></textarea>
+        </div>
+        <button class="btn" type="submit">Save</button>
+      </form>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>Ship to</h2>
+      <p style="line-height:1.8">
+        <strong><%= order.customer_name || '—' %></strong><br>
+        <% if (order.address.line1) { %><%= order.address.line1 %><br><% } %>
+        <% if (order.address.line2) { %><%= order.address.line2 %><br><% } %>
+        <%= [order.address.postal_code, order.address.city].filter(Boolean).join(' ') %><br>
+        <%= [order.address.state, order.address.country].filter(Boolean).join(', ') %>
+      </p>
+      <p class="small">
+        <a href="mailto:<%= order.email %>"><%= order.email %></a>
+        <% if (order.phone) { %><br><%= order.phone %><% } %>
+      </p>
+    </div>
+
+    <div class="panel">
+      <h2>Packing slip</h2>
+      <p class="small muted">Copy this into the box.</p>
+      <pre class="mono small" style="white-space:pre-wrap;color:var(--paper-2)"><%= settings.store_name %>
+Order <%= order.ref %>  ·  <%= order.created_at %>
+
+<% order.items.forEach(function (i) { %><%= i.qty %> x <%= i.name %>
+<% }) %>
+<%= order.customer_name %>
+<%= order.address.line1 || '' %>
+<%= order.address.line2 || '' %>
+<%= [order.address.postal_code, order.address.city].filter(Boolean).join(' ') %>
+<%= [order.address.state, order.address.country].filter(Boolean).join(', ') %>
+
+Thank you — <%= settings.contact_email %></pre>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/admin_foot') %>

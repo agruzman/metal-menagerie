@@ -1,0 +1,62 @@
+<%- include('partials/head', { title: 'Cart' }) %>
+
+<div class="wrap section narrow" style="max-width:900px">
+  <h1>Your cart</h1>
+
+  <% if (flash) { %><div class="notice"><%= flash %></div><% } %>
+
+  <% if (cart.count === 0) { %>
+    <div class="empty">
+      <p>Nothing in here yet.</p>
+      <a class="btn ghost" href="/shop">Back to the shop</a>
+    </div>
+  <% } else { %>
+
+    <form method="post" action="/cart/update">
+      <table class="lines">
+        <thead>
+          <tr><th colspan="2">Piece</th><th>Quantity</th><th class="right">Price</th><th></th></tr>
+        </thead>
+        <tbody>
+          <% cart.lines.forEach(function (l) { %>
+            <tr>
+              <td class="thumb"><img src="<%= l.product.image %>" alt=""></td>
+              <td>
+                <a href="/product/<%= l.product.slug %>"><%= l.product.name %></a>
+                <div class="small muted"><%= l.product.subtitle %></div>
+              </td>
+              <td>
+                <input class="qty" type="number" name="qty[<%= l.product.id %>]"
+                       value="<%= l.qty %>" min="0" max="<%= l.product.stock %>">
+              </td>
+              <td class="right"><%= money(l.line_cents) %></td>
+              <td class="right">
+                <button class="btn small danger" type="submit" name="remove" value="<%= l.product.id %>">Remove</button>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+
+      <div style="margin-top:18px">
+        <button class="btn ghost small" type="submit">Update quantities</button>
+      </div>
+    </form>
+
+    <div class="totals">
+      <div class="row"><span>Subtotal</span><span><%= money(cart.subtotal_cents) %></span></div>
+      <% options.forEach(function (o) { %>
+        <div class="row small muted"><span><%= o.label %></span><span><%= o.cents === 0 ? 'Free' : money(o.cents) %></span></div>
+      <% }) %>
+      <div class="row grand"><span>Total</span><span>from <%= money(cart.subtotal_cents + Math.min.apply(null, options.map(function(o){return o.cents;}))) %></span></div>
+      <p class="small muted">Shipping is chosen at checkout, along with your address.</p>
+
+      <form method="post" action="/checkout">
+        <button class="btn" type="submit" style="width:100%">Checkout</button>
+      </form>
+      <p class="small muted center" style="margin-top:10px">Secure payment by card. You can cancel at any point.</p>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

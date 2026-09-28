@@ -1,0 +1,50 @@
+<%- include('partials/head', { title: 'Checkout' }) %>
+
+<div class="wrap section narrow">
+  <div class="notice">
+    <strong>Demo mode.</strong> No Stripe keys are configured, so this page stands
+    in for the real card form. The order will be recorded and stock reduced, but
+    nothing is charged. Add <code class="mono">STRIPE_SECRET_KEY</code> to your
+    <code class="mono">.env</code> file to take real payments.
+  </div>
+
+  <h1>Checkout</h1>
+
+  <table class="lines" style="margin-bottom:30px">
+    <tbody>
+      <% order.items.forEach(function (i) { %>
+        <tr><td><%= i.qty %> &times; <%= i.name %></td><td class="right"><%= money(i.price_cents * i.qty) %></td></tr>
+      <% }) %>
+      <tr><td><strong>Subtotal</strong></td><td class="right"><strong><%= money(order.subtotal_cents) %></strong></td></tr>
+    </tbody>
+  </table>
+
+  <form method="post" action="/checkout/demo/<%= order.ref %>">
+    <div class="two">
+      <div class="field"><label>Full name</label><input type="text" name="name" required></div>
+      <div class="field"><label>Email</label><input type="email" name="email" required></div>
+    </div>
+    <div class="field"><label>Phone (optional)</label><input type="text" name="phone"></div>
+    <div class="field"><label>Address line 1</label><input type="text" name="line1" required></div>
+    <div class="field"><label>Address line 2</label><input type="text" name="line2"></div>
+    <div class="three">
+      <div class="field"><label>City</label><input type="text" name="city" required></div>
+      <div class="field"><label>Region / state</label><input type="text" name="state"></div>
+      <div class="field"><label>Post code</label><input type="text" name="postal_code" required></div>
+    </div>
+    <div class="field"><label>Country</label><input type="text" name="country" value="<%= settings.country %>" required></div>
+
+    <h2 style="margin-top:30px;font-size:1.1rem">Shipping</h2>
+    <% options.forEach(function (o, idx) { %>
+      <label class="choice">
+        <input type="radio" name="shipping" value="<%= o.id %>" <%= idx === 0 ? 'checked' : '' %>>
+        <span><%= o.label %><br><span class="small muted"><%= o.days[0] %>–<%= o.days[1] %> business days</span></span>
+        <span class="price"><%= o.cents === 0 ? 'Free' : money(o.cents) %></span>
+      </label>
+    <% }) %>
+
+    <button class="btn" type="submit" style="width:100%;margin-top:20px">Place order (no charge)</button>
+  </form>
+</div>
+
+<%- include('partials/foot') %>

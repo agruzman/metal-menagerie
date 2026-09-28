@@ -1,0 +1,46 @@
+<%- include('partials/head', { title: 'Thank you' }) %>
+
+<div class="wrap section narrow">
+  <% if (!order) { %>
+    <h1>Order not found</h1>
+    <p class="muted">We couldn't find that order. If you were charged, email
+      <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a> and it will be sorted out.</p>
+    <p><a class="btn ghost" href="/shop">Back to the shop</a></p>
+  <% } else if (order.status === 'pending') { %>
+    <h1>Payment is being confirmed</h1>
+    <p class="muted">Order <span class="mono"><%= order.ref %></span> is still
+      settling. Refresh this page in a moment — you will get a confirmation email
+      either way.</p>
+  <% } else { %>
+    <div class="eyebrow">Order <%= order.ref %></div>
+    <h1>Thank you.</h1>
+    <p>Your creature is being wrapped. It will be dispatched within three working
+      days and a confirmation has been sent to
+      <strong><%= order.email %></strong>.</p>
+
+    <table class="lines" style="margin-top:30px">
+      <tbody>
+        <% order.items.forEach(function (i) { %>
+          <tr><td><%= i.qty %> &times; <%= i.name %></td><td class="right"><%= money(i.price_cents * i.qty) %></td></tr>
+        <% }) %>
+        <tr><td><%= order.shipping_label || 'Shipping' %></td><td class="right"><%= money(order.shipping_cents) %></td></tr>
+        <tr><td><strong>Total paid</strong></td><td class="right"><strong><%= money(order.total_cents) %></strong></td></tr>
+      </tbody>
+    </table>
+
+    <% if (order.address && order.address.line1) { %>
+      <h2 style="margin-top:36px;font-size:1.1rem">Shipping to</h2>
+      <p class="muted">
+        <%= order.customer_name %><br>
+        <%= order.address.line1 %><br>
+        <% if (order.address.line2) { %><%= order.address.line2 %><br><% } %>
+        <%= [order.address.postal_code, order.address.city].filter(Boolean).join(' ') %><br>
+        <%= [order.address.state, order.address.country].filter(Boolean).join(', ') %>
+      </p>
+    <% } %>
+
+    <p style="margin-top:34px"><a class="btn ghost" href="/shop">Keep looking</a></p>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>

@@ -1,0 +1,51 @@
+<%- include('../partials/admin_head', { title: 'Products' }) %>
+
+<div class="toolbar">
+  <h1 style="font-size:1.6rem;margin:0">Products</h1>
+  <span class="sp"></span>
+  <a class="btn" href="/admin/products/new">Add a new piece</a>
+</div>
+
+<div class="panel">
+  <table class="data">
+    <thead>
+      <tr><th></th><th>Name</th><th>Price</th><th>Stock</th><th>Order</th><th>Listed</th><th></th></tr>
+    </thead>
+    <tbody>
+      <% items.forEach(function (p) { %>
+        <tr>
+          <td style="width:58px"><img class="mini" src="<%= p.image || '/uploads/group.jpg' %>" alt=""></td>
+          <td>
+            <a href="/admin/products/<%= p.id %>/edit"><%= p.name %></a>
+            <div class="small muted"><%= p.subtitle %></div>
+          </td>
+          <td><%= money(p.price_cents) %></td>
+          <td>
+            <span class="stock-btns">
+              <form method="post" action="/admin/products/<%= p.id %>/stock">
+                <input type="hidden" name="delta" value="-1"><button type="submit">−</button>
+              </form>
+              <span class="stock-n"><%= p.stock %></span>
+              <form method="post" action="/admin/products/<%= p.id %>/stock">
+                <input type="hidden" name="delta" value="1"><button type="submit">+</button>
+              </form>
+            </span>
+          </td>
+          <td class="muted"><%= p.sort_order %></td>
+          <td><span class="pill <%= p.active ? 'paid' : '' %>"><%= p.active ? 'live' : 'hidden' %></span></td>
+          <td class="right" style="white-space:nowrap">
+            <a class="btn ghost small" href="/product/<%= p.slug %>" target="_blank">View</a>
+            <a class="btn ghost small" href="/admin/products/<%= p.id %>/edit">Edit</a>
+            <form method="post" action="/admin/products/<%= p.id %>/delete" style="display:inline"
+                  onsubmit="return confirm('Delete ' + <%= JSON.stringify(p.name) %> + '? This cannot be undone.')">
+              <button class="btn small danger" type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <% if (!items.length) { %><p class="muted small">No products yet.</p><% } %>
+</div>
+
+<%- include('../partials/admin_foot') %>

@@ -1,0 +1,72 @@
+<%- include('../partials/admin_head', { title: 'Dashboard' }) %>
+
+<h1 style="font-size:1.6rem">Today at <%= settings.store_name %></h1>
+
+<div class="kpis">
+  <div class="kpi"><div class="n"><%= stats.toShip %></div><div class="k">Waiting to ship</div></div>
+  <div class="kpi"><div class="n"><%= money(stats.last30_cents) %></div><div class="k">Sales, last 30 days</div></div>
+  <div class="kpi"><div class="n"><%= stats.count %></div><div class="k">Orders all time</div></div>
+  <div class="kpi"><div class="n"><%= money(stats.revenue_cents) %></div><div class="k">Revenue all time</div></div>
+</div>
+
+<% if (lowStock.length) { %>
+  <div class="notice">
+    <strong>Running low:</strong>
+    <%= lowStock.map(function (p) { return p.name + ' (' + p.stock + ')'; }).join(' · ') %>
+  </div>
+<% } %>
+
+<div class="panel">
+  <h2>Recent orders</h2>
+  <% if (!recent.length) { %>
+    <p class="muted small">No orders yet. Place a test one from the shop to see how it looks.</p>
+  <% } else { %>
+    <table class="data">
+      <thead><tr><th>Order</th><th>When</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr></thead>
+      <tbody>
+        <% recent.forEach(function (o) { %>
+          <tr>
+            <td><a class="mono" href="/admin/orders/<%= o.id %>"><%= o.ref %></a></td>
+            <td class="muted small"><%= o.created_at %></td>
+            <td><%= o.customer_name || '—' %><div class="small muted"><%= o.email %></div></td>
+            <td class="small"><%= o.items.reduce(function (s, i) { return s + i.qty; }, 0) %></td>
+            <td><%= money(o.total_cents) %></td>
+            <td><span class="pill <%= o.status %>"><%= o.status %></span></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<div class="panel">
+  <h2>Stock at a glance</h2>
+  <table class="data">
+    <thead><tr><th></th><th>Piece</th><th>Price</th><th>In stock</th><th></th></tr></thead>
+    <tbody>
+      <% catalogue.forEach(function (p) { %>
+        <tr>
+          <td style="width:58px"><img class="mini" src="<%= p.image || '/uploads/group.jpg' %>" alt=""></td>
+          <td><a href="/admin/products/<%= p.id %>/edit"><%= p.name %></a>
+              <% if (!p.active) { %> <span class="pill">hidden</span><% } %></td>
+          <td><%= money(p.price_cents) %></td>
+          <td>
+            <span class="stock-btns">
+              <form method="post" action="/admin/products/<%= p.id %>/stock">
+                <input type="hidden" name="delta" value="-1"><button type="submit" title="one less">−</button>
+              </form>
+              <span class="stock-n"><%= p.stock %></span>
+              <form method="post" action="/admin/products/<%= p.id %>/stock">
+                <input type="hidden" name="delta" value="1"><button type="submit" title="one more">+</button>
+              </form>
+            </span>
+          </td>
+          <td class="right"><a class="btn ghost small" href="/admin/products/<%= p.id %>/edit">Edit</a></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+  <p style="margin-top:18px"><a class="btn" href="/admin/products/new">Add a new piece</a></p>
+</div>
+
+<%- include('../partials/admin_foot') %>

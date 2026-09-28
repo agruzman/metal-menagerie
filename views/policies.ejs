@@ -1,0 +1,35 @@
+<%- include('partials/head', { title: 'Shipping & returns' }) %>
+
+<div class="wrap section narrow">
+  <div class="eyebrow">Small print</div>
+  <h1>Shipping &amp; returns</h1>
+
+  <p><%= settings.policies %></p>
+
+  <h2 style="margin-top:40px">Rates</h2>
+  <table class="lines" style="margin-top:14px">
+    <tbody>
+      <% options.forEach(function (o) { %>
+        <tr>
+          <td><%= o.label %><div class="small muted"><%= o.days[0] %>–<%= o.days[1] %> business days</div></td>
+          <td class="right"><%= o.cents === 0 ? 'Free' : money(o.cents) %></td>
+        </tr>
+      <% }) %>
+      <% if (Number(settings.free_shipping_over_cents) > 0) { %>
+        <tr>
+          <td>Orders over <%= money(settings.free_shipping_over_cents) %></td>
+          <td class="right">Free within <%= settings.country %></td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top:40px">Payment</h2>
+  <p>Cards are handled by Stripe. Card numbers are entered on Stripe's own page
+  and are never stored on this website.</p>
+
+  <h2 style="margin-top:40px">Questions</h2>
+  <p><a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a></p>
+</div>
+
+<%- include('partials/foot') %>

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>Shopkeeper</title>
+<link rel="stylesheet" href="/css/style.css">
+<meta name="robots" content="noindex">
+</head>
+<body class="admin">
+<header class="admin-head">
+  <div class="wrap">
+    <a class="brand" href="/admin">Shopkeeper</a>
+    <nav class="admin-nav">
+      <a href="/admin" class="<%= path === '/admin' ? 'on' : '' %>">Dashboard</a>
+      <a href="/admin/products" class="<%= path.indexOf('/admin/products') === 0 ? 'on' : '' %>">Products</a>
+      <a href="/admin/orders" class="<%= path.indexOf('/admin/orders') === 0 ? 'on' : '' %>">Orders</a>
+      <a href="/admin/settings" class="<%= path === '/admin/settings' ? 'on' : '' %>">Settings</a>
+    </nav>
+    <a href="/" class="small muted" target="_blank">View shop ↗</a>
+    <form method="post" action="/admin/logout"><button class="btn ghost small" type="submit">Log out</button></form>
+  </div>
+</header>
+<main class="wrap" style="padding-top:32px;padding-bottom:80px">
+<% if (flash) { %><div class="notice good"><%= flash %></div><% } %>

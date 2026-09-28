@@ -1,0 +1,10 @@
+<a class="card" href="/product/<%= p.slug %>">
+  <div class="shot">
+    <% if (p.stock === 0) { %><span class="tag sold">Sold out</span>
+    <% } else if (p.stock === 1) { %><span class="tag last">Last one</span><% } %>
+    <img src="<%= p.image || '/uploads/group.jpg' %>" alt="<%= p.name %>" loading="lazy">
+  </div>
+  <h3><%= p.name %></h3>
+  <div class="sub"><%= p.subtitle %></div>
+  <div class="price"><%= money(p.price_cents) %></div>
+</a>

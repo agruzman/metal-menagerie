@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= typeof title !== 'undefined' ? title + ' · ' : '' %><%= settings.store_name %></title>
+<meta name="description" content="<%= settings.tagline %>">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🪲</text></svg>">
+</head>
+<body>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/">Metal<span>·</span>Menagerie</a>
+    <nav class="nav">
+      <a href="/shop" class="<%= path.startsWith('/shop') || path.startsWith('/product') ? 'on' : '' %>">Shop</a>
+      <a href="/about" class="<%= path === '/about' ? 'on' : '' %>">The workshop</a>
+      <a href="/policies" class="<%= path === '/policies' ? 'on' : '' %>">Shipping</a>
+      <a class="cart-pill" href="/cart">Cart <b><%= cartCount %></b></a>
+    </nav>
+  </div>
+</header>
+<main>

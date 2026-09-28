@@ -1,0 +1,31 @@
+# Render "Blueprint" — describes the whole deployment so it can be created
+# with one click: https://render.com/deploy?repo=<your GitHub repo URL>
+#
+# Plan: free. Render will ask you for the three values marked `sync: false`
+# when it creates the service (they are secrets, so they never live in Git).
+services:
+  - type: web
+    name: metal-menagerie
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm install --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: TURSO_DATABASE_URL
+        sync: false
+      - key: TURSO_AUTH_TOKEN
+        sync: false
+      # Fill these in later to switch on real card payments:
+      # - key: STRIPE_SECRET_KEY
+      #   sync: false
+      # - key: STRIPE_WEBHOOK_SECRET
+      #   sync: false

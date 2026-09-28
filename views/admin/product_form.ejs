@@ -1,0 +1,93 @@
+<%- include('../partials/admin_head', { title: product ? 'Edit piece' : 'New piece' }) %>
+
+<h1 style="font-size:1.6rem"><%= product ? 'Edit: ' + product.name : 'Add a new piece' %></h1>
+
+<% if (error) { %><div class="notice bad"><%= error %></div><% } %>
+
+<form method="post"
+      action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>"
+      enctype="multipart/form-data">
+  <div class="panel">
+    <div class="two">
+      <div class="field">
+        <label>Name</label>
+        <input type="text" name="name" required value="<%= product ? product.name : '' %>">
+      </div>
+      <div class="field">
+        <label>One-line subtitle</label>
+        <input type="text" name="subtitle" value="<%= product ? product.subtitle : '' %>"
+               placeholder="e.g. Hand-painted steel, six bolt legs">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Description</label>
+      <textarea name="description" placeholder="What it is made from, how it was made, what it feels like to hold."><%= product ? product.description : '' %></textarea>
+    </div>
+
+    <div class="three">
+      <div class="field">
+        <label>Price (<%= settings.currency_symbol %>)</label>
+        <input type="text" name="price" required
+               value="<%= product ? (product.price_cents / 100).toFixed(2) : '' %>" placeholder="68.00">
+      </div>
+      <div class="field">
+        <label>How many in stock</label>
+        <input type="number" name="stock" min="0" value="<%= product ? product.stock : 1 %>">
+      </div>
+      <div class="field">
+        <label>Weight (grams)</label>
+        <input type="number" name="weight_grams" min="0" value="<%= product ? product.weight_grams : 0 %>">
+        <div class="hint">For working out postage.</div>
+      </div>
+    </div>
+
+    <div class="two">
+      <div class="field">
+        <label>Materials</label>
+        <input type="text" name="materials" value="<%= product ? product.materials : '' %>">
+      </div>
+      <div class="field">
+        <label>Dimensions</label>
+        <input type="text" name="dimensions" value="<%= product ? product.dimensions : '' %>">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Photo</h2>
+    <% if (product && product.image) { %>
+      <img src="<%= product.image %>" alt="" style="width:180px;border:1px solid var(--rule);margin-bottom:16px">
+      <input type="hidden" name="existing_image" value="<%= product.image %>">
+    <% } %>
+    <div class="field">
+      <label><%= product && product.image ? 'Replace photo' : 'Upload a photo' %></label>
+      <input type="file" name="photo" accept="image/*">
+      <div class="hint">Square photos look best. Up to 8 MB. Shoot on a plain background in daylight.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="two">
+      <div class="field">
+        <label>Position in the list</label>
+        <input type="number" name="sort_order" value="<%= product ? product.sort_order : 0 %>">
+        <div class="hint">Lower numbers come first.</div>
+      </div>
+      <div class="field">
+        <label>Visibility</label>
+        <label class="choice" style="margin-top:0">
+          <input type="checkbox" name="active" value="1" <%= !product || product.active ? 'checked' : '' %>>
+          <span>Show this piece in the shop</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <button class="btn" type="submit"><%= product ? 'Save changes' : 'Add to the shop' %></button>
+    <a class="btn ghost" href="/admin/products">Cancel</a>
+  </div>
+</form>
+
+<%- include('../partials/admin_foot') %>

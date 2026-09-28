@@ -1,0 +1,12 @@
+node_modules/
+.env
+data/
+public/uploads/*
+!public/uploads/ladybug.jpg
+!public/uploads/beetle.jpg
+!public/uploads/spider.jpg
+!public/uploads/group.jpg
+.DS_Store
+npm-debug.log*
+# the original phone photo the product shots were cut from — not needed on the server
+WhatsApp Image*

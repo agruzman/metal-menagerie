@@ -1,0 +1,61 @@
+<%- include('../partials/admin_head', { title: 'Settings' }) %>
+
+<h1 style="font-size:1.6rem">Settings</h1>
+
+<form method="post" action="/admin/settings">
+  <div class="panel">
+    <h2>The shop</h2>
+    <div class="two">
+      <div class="field"><label>Shop name</label><input type="text" name="store_name" value="<%= values.store_name %>"></div>
+      <div class="field"><label>Contact email</label><input type="text" name="contact_email" value="<%= values.contact_email %>">
+        <div class="hint">New-order notifications are sent here.</div></div>
+    </div>
+    <div class="field"><label>Tagline</label><input type="text" name="tagline" value="<%= values.tagline %>"></div>
+    <div class="field"><label>Introduction</label><textarea name="intro" style="min-height:90px"><%= values.intro %></textarea></div>
+  </div>
+
+  <div class="panel">
+    <h2>Money</h2>
+    <div class="three">
+      <div class="field"><label>Currency code</label><input type="text" name="currency" value="<%= values.currency %>">
+        <div class="hint">Lower case, e.g. usd, eur, gbp, ils.</div></div>
+      <div class="field"><label>Symbol</label><input type="text" name="currency_symbol" value="<%= values.currency_symbol %>"></div>
+      <div class="field"><label>Home country</label><input type="text" name="country" value="<%= values.country %>">
+        <div class="hint">Two letters, e.g. US.</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Shipping</h2>
+    <div class="two">
+      <div class="field"><label>Domestic label</label><input type="text" name="ship_domestic_label" value="<%= values.ship_domestic_label %>"></div>
+      <div class="field"><label>Domestic price (<%= values.currency_symbol %>)</label>
+        <input type="text" name="ship_domestic_cents" value="<%= (Number(values.ship_domestic_cents)/100).toFixed(2) %>"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>International label</label><input type="text" name="ship_intl_label" value="<%= values.ship_intl_label %>"></div>
+      <div class="field"><label>International price (<%= values.currency_symbol %>)</label>
+        <input type="text" name="ship_intl_cents" value="<%= (Number(values.ship_intl_cents)/100).toFixed(2) %>"></div>
+    </div>
+    <div class="two">
+      <div class="field"><label>Free domestic shipping over (<%= values.currency_symbol %>)</label>
+        <input type="text" name="free_shipping_over_cents" value="<%= (Number(values.free_shipping_over_cents)/100).toFixed(2) %>">
+        <div class="hint">Set to 0 to switch it off.</div></div>
+      <div class="field"><label>Low-stock warning at</label>
+        <input type="number" name="low_stock_threshold" value="<%= values.low_stock_threshold %>"></div>
+    </div>
+    <div class="field">
+      <label>Countries you will ship to</label>
+      <textarea name="ship_countries" style="min-height:70px"><%= values.ship_countries %></textarea>
+      <div class="hint">Two-letter codes separated by commas. Only these appear at checkout.</div>
+    </div>
+    <div class="field">
+      <label>Shipping &amp; returns text</label>
+      <textarea name="policies"><%= values.policies %></textarea>
+    </div>
+  </div>
+
+  <button class="btn" type="submit">Save settings</button>
+</form>
+
+<%- include('../partials/admin_foot') %>

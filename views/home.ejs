@@ -1,0 +1,34 @@
+<%- include('partials/head') %>
+
+<div class="wrap">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Handmade · one of a kind</div>
+      <h1><%= settings.tagline %></h1>
+      <p><%= settings.intro %></p>
+      <p style="margin-top:26px">
+        <a class="btn" href="/shop">See what's in the workshop</a>
+      </p>
+    </div>
+    <div class="hero-art">
+      <img src="/uploads/group.jpg" alt="Three handmade metal insects on a workbench">
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>In stock now</h2>
+    <p class="muted" style="margin-bottom:34px">
+      Each piece is listed individually. When the counter hits zero, that one has found a home.
+    </p>
+    <div class="grid">
+      <% products.forEach(function (p) { %>
+        <%- include('partials/card', { p: p }) %>
+      <% }) %>
+    </div>
+    <% if (products.length === 0) { %>
+      <div class="empty">The shelves are empty just now. Check back soon.</div>
+    <% } %>
+  </section>
+</div>
+
+<%- include('partials/foot') %>

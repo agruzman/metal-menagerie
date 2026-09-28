@@ -1,0 +1,56 @@
+<%- include('partials/head', { title: product.name }) %>
+
+<div class="wrap">
+  <section class="product">
+    <div class="shot">
+      <img src="<%= product.image || '/uploads/group.jpg' %>" alt="<%= product.name %>">
+    </div>
+
+    <div>
+      <div class="eyebrow">Handmade · one of a kind</div>
+      <h1><%= product.name %></h1>
+      <p class="muted" style="margin-top:-6px"><%= product.subtitle %></p>
+      <div class="price-big"><%= money(product.price_cents) %></div>
+
+      <p><%= product.description %></p>
+
+      <% if (product.stock > 0) { %>
+        <form method="post" action="/cart/add" style="display:flex;gap:12px;align-items:center;margin-top:26px">
+          <input type="hidden" name="product_id" value="<%= product.id %>">
+          <input class="qty" type="number" name="qty" value="1" min="1" max="<%= product.stock %>" aria-label="Quantity">
+          <button class="btn" type="submit">Add to cart</button>
+          <span class="small muted">
+            <%= product.stock %> available
+          </span>
+        </form>
+      <% } else { %>
+        <p class="notice bad" style="margin-top:26px">
+          This one has sold. Write to <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a>
+          if you would like something similar made.
+        </p>
+      <% } %>
+
+      <div class="spec">
+        <dl>
+          <% if (product.materials) { %><dt>Materials</dt><dd><%= product.materials %></dd><% } %>
+          <% if (product.dimensions) { %><dt>Size</dt><dd><%= product.dimensions %></dd><% } %>
+          <% if (product.weight_grams) { %><dt>Weight</dt><dd><%= product.weight_grams %> g</dd><% } %>
+          <dt>Shipping</dt><dd>Dispatched within 3 working days, boxed and foam-wrapped.</dd>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <% if (others.length) { %>
+    <section class="section">
+      <h2>Also in the workshop</h2>
+      <div class="grid" style="margin-top:26px">
+        <% others.forEach(function (p) { %>
+          <%- include('partials/card', { p: p }) %>
+        <% }) %>
+      </div>
+    </section>
+  <% } %>
+</div>
+
+<%- include('partials/foot') %>
