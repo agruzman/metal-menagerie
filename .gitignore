@@ -8,5 +8,10 @@ public/uploads/*
 !public/uploads/group.jpg
 .DS_Store
 npm-debug.log*
+# left behind by the Python-runtime shim (setup.py) — not source
+*.egg-info/
+__pycache__/
+build/
+dist/
 # the original phone photo the product shots were cut from — not needed on the server
 WhatsApp Image*

@@ -8,11 +8,11 @@
  *     (Render, etc.) where the server's own disk is wiped on every restart.
  *     Driver: the `libsql` package, which speaks the same API as better-sqlite3.
  *
- *  2. Otherwise, a local file data/shop.db via better-sqlite3 — fast and
- *     battle-tested, but it compiles a small C++ addon on install.
+ *  2. Otherwise, a local file data/shop.db using the SQLite built into Node
+ *     itself (Node 22.13 or newer) — nothing to compile, nothing to install.
  *
- *  3. If that compile failed, Node's own built-in SQLite (Node 22+), which
- *     needs nothing at all.
+ *  3. If you have installed the optional `better-sqlite3` package
+ *     (npm install better-sqlite3), it is used for the local file instead.
  *
  * The rest of the app cannot tell the difference between the three.
  */
@@ -26,8 +26,8 @@ if (TURSO_URL) {
 } else {
   try {
     Database = require('better-sqlite3');
-  } catch (err) {
-    Database = buildFallback(err);
+  } catch {
+    Database = buildBuiltin();
   }
 }
 
@@ -125,27 +125,21 @@ function buildTurso() {
   };
 }
 
-function buildFallback(originalError) {
+function buildBuiltin() {
   let DatabaseSync;
   try {
     ({ DatabaseSync } = require('node:sqlite'));
   } catch {
     console.error(
-      '\n  Could not open a database.\n' +
-        '  better-sqlite3 is not installed (' + originalError.message + ')\n' +
-        "  and this version of Node has no built-in SQLite.\n" +
-        '  Fix: install Node 22 or newer from https://nodejs.org, then run "npm install" again.\n'
+      '\n  Could not open a database: this version of Node (' + process.version + ')\n' +
+        '  has no built-in SQLite. Install Node 22.13 or newer from https://nodejs.org\n' +
+        '  (or run "npm install better-sqlite3" to use that instead).\n'
     );
     process.exit(1);
   }
 
-  console.warn(
-    '[db] better-sqlite3 is unavailable — using Node\'s built-in SQLite instead. ' +
-      'Everything works; run "npm rebuild better-sqlite3" if you want the faster one.'
-  );
-
   /** The slice of the better-sqlite3 API this project uses. */
-  return class FallbackDatabase {
+  return class BuiltinDatabase {
     constructor(file) {
       this._db = new DatabaseSync(file);
     }

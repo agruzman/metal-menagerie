@@ -265,13 +265,18 @@ notifications to land.
 
 ## 8. When something goes wrong
 
-**`npm install` fails on better-sqlite3.** It is optional — the shop falls
-back to Node's built-in SQLite and runs fine. You will see a one-line warning.
-If you want the faster library, install Xcode Command Line Tools
-(`xcode-select --install`) and run `npm rebuild better-sqlite3`.
+**"Could not open a database" on startup.** Your Node is too old — the shop
+uses the SQLite built into Node 22.13 and newer. Install the current LTS from
+nodejs.org and run `npm install` again.
 
-**"Could not open a database" on startup.** Your Node is too old. Install Node
-22 or newer from nodejs.org and run `npm install` again.
+**Render runs `pip install -r requirements.txt` — the service was created
+with the Python runtime.** It still works: `requirements.txt`, `setup.py`,
+`app.py` and `gunicorn.conf.py` exist precisely for this case. The Python
+build installs the Node dependencies, and whatever Python start command the
+service has (`gunicorn app:app`, `python app.py`, …) hands over to
+`server.js`. The cleaner fix, when you have a minute, is Settings → *Build* →
+*Source* → **Edit** → Runtime **Node**, build `npm install --omit=dev`, start
+`npm start`; the Python files then simply go unused.
 
 **Port 3000 is already in use.** Change `PORT=3001` in `.env`.
 

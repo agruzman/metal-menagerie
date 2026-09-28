@@ -1,0 +1,12 @@
+# This shop is a Node.js app (server.js). This file exists so that it also
+# runs on a Render service that was created with the *Python* runtime:
+#
+#   - "."        installs this folder as a tiny Python package whose setup.py
+#                runs `npm install`, so the Node dependencies get installed
+#                during the Python build step.
+#   - gunicorn   is the Python web server such a service starts by default;
+#                app.py hands every request it receives to the Node app.
+#
+# On a service created with the Node runtime none of this is used.
+gunicorn>=22
+.

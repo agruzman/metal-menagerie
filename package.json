@@ -5,12 +5,13 @@
   "description": "A small online shop for handmade metal statues: catalog, cart, card payments, shipping, inventory and an admin dashboard.",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
-    "test": "node test.js"
+    "prestart": "node -e \"if(!require('fs').existsSync('node_modules/express')){console.log('[prestart] installing dependencies');require('child_process').execSync('npm install --omit=dev --no-audit --no-fund',{stdio:'inherit'})}\"",
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "dev": "node --disable-warning=ExperimentalWarning --watch server.js",
+    "test": "node --disable-warning=ExperimentalWarning test.js"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=22.13 <25"
   },
   "dependencies": {
     "cookie-session": "^2.1.0",
@@ -21,8 +22,5 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.16",
     "stripe": "^17.4.0"
-  },
-  "optionalDependencies": {
-    "better-sqlite3": "^11.5.0"
   }
 }

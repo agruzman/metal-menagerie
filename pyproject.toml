@@ -1,0 +1,15 @@
+# Minimal Python package definition. Its only job is to let pip run setup.py,
+# which installs the Node.js dependencies when this repo is built by a
+# Python-runtime service. See requirements.txt and app.py.
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "metal-menagerie-node-shim"
+version = "0.0.1"
+description = "Installs the Node.js dependencies of this shop during a Python build."
+requires-python = ">=3.8"
+
+[tool.setuptools]
+py-modules = []
