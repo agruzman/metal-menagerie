@@ -61,6 +61,9 @@ REPO_URL="https://github.com/$GH_USER/$REPO_NAME"
 
 bold "Pushing the code to $REPO_URL"
 [ -d .git ] || git init -q -b main
+# The push is ~1 MB (the photos). Above Git's default 1 MB buffer it switches
+# to chunked uploads, which some office proxies reject with HTTP 400.
+git config http.postBuffer 157286400
 # Git needs a name on the commit; use the GitHub one if none is configured.
 git config user.email >/dev/null || git config user.email "$GH_USER@users.noreply.github.com"
 git config user.name  >/dev/null || git config user.name  "$GH_USER"
