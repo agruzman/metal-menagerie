@@ -118,7 +118,7 @@ Instead:
 1. The buyer picks a piece, fills in name, email, phone and shipping address
    (the country list is Europe, USA, Emirates and Israel only) and presses
    **Send order request**.
-2. Two emails go out: one to **alex.gruzman@gmail.com** with every detail and
+2. Two emails go out: one to **smallartofmetal@gmail.com** with every detail and
    *Reply-To* set to the buyer, one to the buyer confirming receipt.
 3. You reply within a day: "still available, total is $X including shipping,
    here is how to pay" (PayPal invoice, PayPal.me link, bank transfer).
@@ -305,7 +305,7 @@ The order flow (section 3) lives on email, so this is the one optional-looking
 step that is not optional. Until it is done, requests still appear in
 `/admin/orders`, but nobody gets notified.
 
-With the Gmail account **alex.gruzman@gmail.com** (about three minutes):
+With the Gmail account **smallartofmetal@gmail.com** (about three minutes):
 
 1. Turn on 2-step verification for the Google account
    (myaccount.google.com → Security).
@@ -317,13 +317,13 @@ With the Gmail account **alex.gruzman@gmail.com** (about three minutes):
    ```
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=465
-   SMTP_USER=alex.gruzman@gmail.com
+   SMTP_USER=smallartofmetal@gmail.com
    SMTP_PASS=the-16-character-app-password
-   MAIL_FROM=alex.gruzman@gmail.com
+   MAIL_FROM=smallartofmetal@gmail.com
    ```
 
 *Contact email* in admin → Settings decides where new-order notifications
-land; it is `alex.gruzman@gmail.com` by default. Gmail allows about 500
+land; it is `smallartofmetal@gmail.com` by default. Gmail allows about 500
 messages a day, which is more orders than the shelf can hold.
 
 ---

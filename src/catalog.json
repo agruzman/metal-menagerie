@@ -12,6 +12,13 @@
       "role": "artist"
     },
     {
+      "file": "Genka at work.jpeg",
+      "image": "genka-welding.jpg",
+      "role": "artist",
+      "manual": true,
+      "note": "Genka welding — cropped and enhanced by hand (no background blur: the workshop is the point)"
+    },
+    {
       "file": "WhatsApp Image 2026-09-29 at 07.09.57.jpeg",
       "image": "bolt-puppy.jpg",
       "box": [

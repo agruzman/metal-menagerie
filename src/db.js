@@ -97,7 +97,7 @@ const DEFAULT_SETTINGS = {
     'Genka builds these in the corner of a steel factory in Israel, after his ' +
     'shift, out of spoons, bolts, chain and whatever else was heading for the ' +
     'scrap bin. Every piece exists exactly once. When it is gone, it is gone.',
-  contact_email: 'alex.gruzman@gmail.com',
+  contact_email: 'smallartofmetal@gmail.com',
   currency: 'usd',
   currency_symbol: '$',
   country: 'IL',

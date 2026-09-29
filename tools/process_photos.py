@@ -165,8 +165,8 @@ def main():
     for i, entry in enumerate(catalog["photos"]):
         if wanted is not None and i not in wanted:
             continue
-        if not entry.get("image"):
-            continue
+        if not entry.get("image") or entry.get("manual"):
+            continue  # "manual": finished by hand, leave it alone
         dest, crop, cover = process(entry, i)
         print(f"#{i:02d} {entry['image']:<32} crop={crop} subject={cover:.0%}")
 
