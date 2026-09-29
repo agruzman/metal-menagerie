@@ -193,6 +193,29 @@ h2 { font-size: clamp(1.35rem, 3vw, 1.9rem); }
 .spec dt { color: var(--muted); }
 .spec dd { margin: 0; color: var(--paper-2); }
 
+.gallery { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.gallery button {
+  width: 84px; height: 84px; padding: 0; border: 1px solid var(--rule); background: #0f0e0a;
+  cursor: pointer; opacity: .65; transition: .15s;
+}
+.gallery button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.gallery button.on, .gallery button:hover { opacity: 1; border-color: var(--copper); }
+
+/* ----------------------------- the maker ------------------------------ */
+
+.artist { display: grid; grid-template-columns: .8fr 1.2fr; gap: 56px; align-items: start; }
+.artist .portrait img { border: 1px solid var(--rule); }
+.artist .bio p { font-size: 1.05rem; max-width: 60ch; }
+.meet {
+  display: grid; grid-template-columns: 260px 1fr; gap: 40px; align-items: center;
+  border-top: 1px solid var(--rule);
+}
+.meet-photo img { border: 1px solid var(--rule); aspect-ratio: 1; object-fit: cover; }
+@media (max-width: 860px) {
+  .artist, .meet { grid-template-columns: 1fr; gap: 28px; }
+  .meet-photo { max-width: 260px; }
+}
+
 .qty {
   width: 74px;
   padding: 11px;

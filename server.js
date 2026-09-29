@@ -26,7 +26,8 @@ const cookieSession = require('cookie-session');
 
 const { seed, getSettings, products, images } = require('./src/db');
 const { UPLOAD_DIR } = require('./src/paths');
-const { readCart } = require('./src/helpers');
+const { readCart, thumb } = require('./src/helpers');
+const { countryName } = require('./src/countries');
 const checkout = require('./src/routes/checkout');
 
 const app = express();
@@ -91,6 +92,9 @@ app.use((req, res, next) => {
   const settings = getSettings();
   res.locals.settings = settings;
   res.locals.money = (c) => require('./src/helpers').money(c, settings);
+  res.locals.thumb = thumb;
+  res.locals.countryName = countryName;
+  res.locals.baseUrl = BASE_URL;
   res.locals.cartCount = readCart(req).count;
   res.locals.path = req.path;
   res.locals.flash = req.query.msg || '';
@@ -121,6 +125,9 @@ app.use((err, req, res, next) => {
     Object.assign(res.locals, {
       settings: s,
       money: (c) => require('./src/helpers').money(c, s),
+      thumb,
+      countryName,
+      baseUrl: BASE_URL,
       cartCount: 0,
       path: req.path,
       flash: '',
@@ -135,7 +142,10 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log(`  Shop   ${BASE_URL}`);
   console.log(`  Admin  ${BASE_URL}/admin`);
   console.log(
-    `  Payments: ${live ? 'Stripe' : 'DEMO MODE (no card is charged — add STRIPE_SECRET_KEY to .env to go live)'}\n`
+    `  Orders:   ${live ? 'card checkout via Stripe' : 'order requests by email (add STRIPE_SECRET_KEY for card checkout)'}`
+  );
+  console.log(
+    `  Email:    ${require('./src/mailer').configured ? 'SMTP configured' : 'NOT configured — requests are only visible in /admin (set SMTP_* to send emails)'}\n`
   );
   keepAwake();
 });

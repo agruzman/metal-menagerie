@@ -4,6 +4,7 @@
   <h1 style="font-size:1.6rem;margin:0">Orders</h1>
   <span class="sp"></span>
   <a class="btn ghost small <%= status === '' ? 'on' : '' %>" href="/admin/orders">All</a>
+  <a class="btn ghost small" href="/admin/orders?status=requested">New requests</a>
   <a class="btn ghost small" href="/admin/orders?status=paid">To ship</a>
   <a class="btn ghost small" href="/admin/orders?status=shipped">Shipped</a>
   <a class="btn ghost small" href="/admin/orders?status=pending">Unfinished</a>

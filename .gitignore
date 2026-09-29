@@ -1,11 +1,9 @@
 node_modules/
 .env
 data/
-public/uploads/*
-!public/uploads/ladybug.jpg
-!public/uploads/beetle.jpg
-!public/uploads/spider.jpg
-!public/uploads/group.jpg
+# the original phone photos (10 MB) stay on your computer; the processed
+# catalogue images in public/uploads are what the site needs
+products/
 .DS_Store
 npm-debug.log*
 # left behind by the Python-runtime shim (setup.py) — not source

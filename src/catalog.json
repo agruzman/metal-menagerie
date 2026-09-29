@@ -1,0 +1,770 @@
+{
+  "_comment": "One entry per photo in /products. `image` is the processed file written to public/uploads. `product` seeds the shop; `gallery_for` adds a second angle to an existing product; `role: artist` is the bio portrait. `box` = where the sculpture is (fractions x0,y0,x1,y1) when the centred default misses.",
+  "photos": [
+    {
+      "file": "Genka.jpeg",
+      "image": "bug-collection.jpg",
+      "note": "the three insects together — used on the home page"
+    },
+    {
+      "file": "WhatsApp Image 2026-09-15 at 20.37.25.jpeg",
+      "image": "genka.jpg",
+      "role": "artist"
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.09.57.jpeg",
+      "image": "bolt-puppy.jpg",
+      "box": [
+        0.15,
+        0.15,
+        0.85,
+        0.85
+      ],
+      "product": {
+        "slug": "bolt-puppy",
+        "name": "Bolt Puppy",
+        "price": 290,
+        "subtitle": "Nuts for a head, a spring for a spine",
+        "description": "Five bolts, a handful of nuts and one coil spring, welded into a puppy that is permanently pleased to see you. Sits on any shelf, never chews the furniture, never needs walking.",
+        "materials": "Steel bolts, hex nuts, coil spring"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.09.59.jpeg",
+      "image": "grater-owl.jpg",
+      "box": [
+        0.2,
+        0.08,
+        0.85,
+        0.8
+      ],
+      "product": {
+        "slug": "grater-owl",
+        "name": "Grater Owl",
+        "price": 590,
+        "subtitle": "A kitchen grater with opinions",
+        "description": "The chest is an old grater, the ears are two long screws, the stare is entirely its own. Faces the door and silently judges everyone who comes through it.",
+        "materials": "Steel grater, screws, sheet steel, forged rod"
+      },
+      "busy": 1.3
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.00.jpeg",
+      "image": "owl-on-a-perch.jpg",
+      "box": [
+        0.12,
+        0.08,
+        0.8,
+        0.8
+      ],
+      "product": {
+        "slug": "owl-on-a-perch",
+        "name": "Owl on a Perch",
+        "price": 590,
+        "subtitle": "Spoon wings, a mesh chest, one bent bar",
+        "description": "Wings from two spoons, a chest of hexagonal mesh, and a perch that curls up out of a heavy round base so it can watch the room from above. The one Genka's colleagues argue over.",
+        "materials": "Spoons, steel mesh, round bar, steel base"
+      },
+      "busy": 1.4,
+      "crop": [
+        0.08,
+        0.06,
+        0.82,
+        0.8
+      ]
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.01.jpeg",
+      "image": "scorpion.jpg",
+      "box": [
+        0.1,
+        0.2,
+        0.95,
+        0.8
+      ],
+      "product": {
+        "slug": "scorpion",
+        "name": "Scorpion",
+        "price": 490,
+        "subtitle": "Chain links, hooks and a sting in the tail",
+        "description": "Every segment is a chain link, the claws are two lifting hooks, and the tail curls exactly the way you would rather it didn't. Harmless. Probably.",
+        "materials": "Steel chain, hooks, forged rod"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.05.jpeg",
+      "image": "steel-rose.jpg",
+      "box": [
+        0.05,
+        0.12,
+        0.95,
+        0.8
+      ],
+      "product": {
+        "slug": "steel-rose",
+        "name": "Steel Rose",
+        "price": 390,
+        "subtitle": "The rose that outlives all the others",
+        "description": "Petals cut and folded one at a time from sheet steel, then welded onto a stem with two leaves. It never wilts, never needs water, and cannot be quietly regifted.",
+        "materials": "Sheet steel, round bar"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.06.jpeg",
+      "image": "the-pack.jpg",
+      "box": [
+        0.05,
+        0.2,
+        0.98,
+        0.7
+      ],
+      "product": {
+        "slug": "the-pack",
+        "name": "The Pack — three dogs",
+        "price": 740,
+        "subtitle": "Set of three: the terrier, the bulldog and the hound",
+        "description": "Three small dogs from bolts, nuts and springs, each with its own personality problem. Sold as a family; separating them would be cruel.",
+        "materials": "Steel bolts, hex nuts, coil springs, chain"
+      },
+      "busy": 1.2
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.09.jpeg",
+      "image": "chain-crocodile.jpg",
+      "box": [
+        0.02,
+        0.15,
+        0.98,
+        0.75
+      ],
+      "product": {
+        "slug": "chain-crocodile",
+        "name": "Chain Crocodile",
+        "price": 640,
+        "subtitle": "A bicycle chain with teeth",
+        "description": "Its back is a full bicycle chain, its feet are springs, and its grin is a pair of pliers. Long, low and extremely patient.",
+        "materials": "Bicycle chain, pliers, coil springs, steel rod"
+      },
+      "busy": 1.2
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.10.jpeg",
+      "image": "the-knight.jpg",
+      "box": [
+        0.05,
+        0.1,
+        0.95,
+        0.92
+      ],
+      "product": {
+        "slug": "the-knight",
+        "name": "The Knight",
+        "price": 690,
+        "subtitle": "Mesh chain-mail, a sword, a shield — no fear",
+        "description": "Mesh armour over a barrel chest, a sword raised in one hand and a shield with a brass rosette in the other, on a polished steel base. Undefeated, mostly because nobody has dared.",
+        "materials": "Steel mesh, sheet steel, brass rosette, polished base"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.11.jpeg",
+      "image": "little-bull.jpg",
+      "box": [
+        0.05,
+        0.3,
+        0.95,
+        0.85
+      ],
+      "product": {
+        "slug": "little-bull",
+        "name": "Little Bull",
+        "price": 440,
+        "subtitle": "Heavy nuts, forward horns, low centre of gravity",
+        "description": "Built almost entirely from large hex nuts, which is why it feels like a paperweight and stands like a tank. Horns first, questions later.",
+        "materials": "Large hex nuts, bolts, steel rod"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.12.jpeg",
+      "image": "spoon-mouse.jpg",
+      "box": [
+        0.08,
+        0.15,
+        0.95,
+        0.85
+      ],
+      "product": {
+        "slug": "spoon-mouse",
+        "name": "Spoon Mouse",
+        "price": 390,
+        "subtitle": "Ears from two spoons, whiskers from welding wire",
+        "description": "A mouse with spoon ears, wire whiskers and the slightly startled expression of something that has just been welded. For people who like mice at a safe, metallic distance.",
+        "materials": "Spoons, welding wire, sheet steel"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.13.jpeg",
+      "image": "dragonfly.jpg",
+      "box": [
+        0.05,
+        0.25,
+        0.95,
+        0.85
+      ],
+      "product": {
+        "slug": "dragonfly",
+        "name": "Dragonfly",
+        "price": 390,
+        "subtitle": "Four spoon wings and a ball-bearing body",
+        "description": "Wings from four spoons hammered thin, a body of ball bearings, and a tail that tapers to a point. Lands on a shelf and stays there.",
+        "materials": "Spoons, ball bearings, steel rod"
+      },
+      "busy": 1.4
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.14.jpeg",
+      "image": "bearing-snail.jpg",
+      "box": [
+        0.15,
+        0.3,
+        0.95,
+        0.85
+      ],
+      "product": {
+        "slug": "bearing-snail",
+        "name": "Bearing Snail",
+        "price": 290,
+        "subtitle": "The shell is a ball bearing. The hurry is not.",
+        "description": "A ball bearing for a shell, two bolts for eye-stalks, and a body that is going somewhere, eventually. The smallest piece in the collection and one of the most loved.",
+        "materials": "Ball bearing, bolts, sheet steel"
+      },
+      "busy": 1.2
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.16.jpeg",
+      "image": "hummingbird.jpg",
+      "box": [
+        0.02,
+        0.05,
+        0.98,
+        0.7
+      ],
+      "product": {
+        "slug": "hummingbird",
+        "name": "Hummingbird at the Flower",
+        "price": 490,
+        "subtitle": "A bird, a flower, one long curved stem",
+        "description": "A hummingbird with spoon wings hovers at a steel flower on a tall curved stem. Tall, light and quiet — the piece that goes on the windowsill.",
+        "materials": "Spoons, sheet steel, round bar"
+      },
+      "busy": 1.3,
+      "crop": [
+        0.03,
+        0.02,
+        0.97,
+        0.55
+      ]
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.17.jpeg",
+      "image": "floor-scrubber.jpg",
+      "box": [
+        0.02,
+        0.1,
+        0.98,
+        0.75
+      ],
+      "product": {
+        "slug": "floor-scrubber",
+        "name": "The Floor Scrubber",
+        "price": 540,
+        "subtitle": "A monument to everyone who has ever been told to clean up",
+        "description": "On his knees with a brush, on a perforated steel plate, scrubbing for eternity. Genka made it after a particularly long shift. Every cleaner who sees it laughs; every boss looks away.",
+        "materials": "Steel rod, perforated plate, natural-bristle brush"
+      },
+      "busy": 1.4
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.21.jpeg",
+      "image": "floor-scrubber-2.jpg",
+      "box": [
+        0.02,
+        0.15,
+        0.98,
+        0.85
+      ],
+      "gallery_for": "floor-scrubber",
+      "busy": 1.4
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.22.jpeg",
+      "image": "ostrich.jpg",
+      "box": [
+        0.05,
+        0.08,
+        0.95,
+        0.92
+      ],
+      "product": {
+        "slug": "ostrich",
+        "name": "Ostrich",
+        "price": 590,
+        "subtitle": "Fork feathers, a spoon body, legs that mean business",
+        "description": "Two forks for wings, a spoon for a body and a neck that stretches up out of a bolt. It looks as though it is about to ask you something.",
+        "materials": "Forks, spoon, bolts, steel rod"
+      },
+      "crop": [
+        0.0,
+        0.03,
+        1.0,
+        0.8
+      ]
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.23.jpeg",
+      "image": "octopus.jpg",
+      "box": [
+        0.15,
+        0.15,
+        0.85,
+        0.85
+      ],
+      "product": {
+        "slug": "octopus",
+        "name": "Octopus",
+        "price": 490,
+        "subtitle": "A polished dome, two eyes and eight reasons to keep your distance",
+        "description": "A polished steel dome for a head, ball bearings for eyes, and tentacles that curl under it as if it has just landed. Sits perfectly flat, weighs more than you expect.",
+        "materials": "Polished steel dome, ball bearings, forged rod"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.24.jpeg",
+      "image": "vespa-rider.jpg",
+      "box": [
+        0.05,
+        0.15,
+        0.98,
+        0.85
+      ],
+      "product": {
+        "slug": "vespa-rider",
+        "name": "Vespa Rider",
+        "price": 640,
+        "subtitle": "Man, scooter, ball bearings for wheels",
+        "description": "A rider hunched over a scooter built from bolts and two ball bearings. Looks fast even standing still — and the wheels actually turn.",
+        "materials": "Steel bolts, ball bearings, sheet steel, brass"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.29.jpeg",
+      "image": "vespa-rider-2.jpg",
+      "box": [
+        0.15,
+        0.15,
+        0.85,
+        0.85
+      ],
+      "gallery_for": "vespa-rider"
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.30.jpeg",
+      "image": "green-tractor.jpg",
+      "box": [
+        0.02,
+        0.1,
+        0.98,
+        0.8
+      ],
+      "product": {
+        "slug": "green-tractor",
+        "name": "Green Tractor",
+        "price": 690,
+        "subtitle": "An electric-motor rotor for an engine, bearings for wheels",
+        "description": "The engine block is a real electric-motor rotor, the wheels are ball bearings, and the paint is tractor green, as it should be. For people who owned a toy exactly like this and lost it.",
+        "materials": "Motor rotor, ball bearings, sheet steel, enamel paint"
+      },
+      "busy": 1.3
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.47.jpeg",
+      "image": "anchor.jpg",
+      "box": [
+        0.05,
+        0.05,
+        0.95,
+        0.95
+      ],
+      "product": {
+        "slug": "anchor",
+        "name": "Anchor",
+        "price": 490,
+        "subtitle": "Chain, shackles, a ring — and it holds",
+        "description": "A proper anchor in stainless steel with its own chain and shackle. For sailors, ex-sailors and anyone who wants something in the house to hold on to.",
+        "materials": "Stainless steel, chain, shackle"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.48.jpeg",
+      "image": "rooster.jpg",
+      "box": [
+        0.1,
+        0.05,
+        0.95,
+        0.92
+      ],
+      "product": {
+        "slug": "rooster",
+        "name": "Rooster",
+        "price": 590,
+        "subtitle": "A saw blade for a comb, pliers for a beak",
+        "description": "The comb is a saw blade, the beak is a pair of pliers, the body is a polished spoon, and the attitude is one hundred percent rooster. Crows silently at dawn, which is the best kind.",
+        "materials": "Saw blade, pliers, spoon, screws"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.49.jpeg",
+      "image": "cat-and-ball.jpg",
+      "box": [
+        0.05,
+        0.15,
+        0.98,
+        0.85
+      ],
+      "product": {
+        "slug": "cat-and-ball",
+        "name": "Cat & Ball",
+        "price": 490,
+        "subtitle": "Spring body, hook tail, one brass ball to bat around",
+        "description": "A cat with a coiled spring for a body and a hook for a tail, mid-pounce on a brass ball, mounted on a polished wooden base. Never knocks anything off the shelf.",
+        "materials": "Coil spring, steel hook, brass ball, hardwood base"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.50.jpeg",
+      "image": "the-embrace.jpg",
+      "box": [
+        0.1,
+        0.05,
+        0.95,
+        0.95
+      ],
+      "product": {
+        "slug": "the-embrace",
+        "name": "The Embrace",
+        "price": 640,
+        "subtitle": "Two crane hooks, one hug",
+        "description": "Two lifting hooks bent into a couple holding each other — one head in brass, one in black with a mane of rubber strips. Heavier than it looks, like most relationships.",
+        "materials": "Crane hooks, brass ball, rubber, steel base"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.53.jpeg",
+      "image": "stone-bull.jpg",
+      "box": [
+        0.05,
+        0.15,
+        0.95,
+        0.8
+      ],
+      "product": {
+        "slug": "stone-bull",
+        "name": "Stone Bull",
+        "price": 590,
+        "subtitle": "A river stone in a steel harness, horns included",
+        "description": "The body is a real river stone held in a welded steel frame; the horns, legs and nose ring are steel. Every one is different, because every stone is.",
+        "materials": "River stone, steel band, bolts, forged rod"
+      },
+      "busy": 1.3,
+      "crop": [
+        0.25,
+        0.14,
+        0.95,
+        0.72
+      ]
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.57.jpeg",
+      "image": "sailing-ship.jpg",
+      "box": [
+        0.15,
+        0.08,
+        0.9,
+        0.95
+      ],
+      "product": {
+        "slug": "sailing-ship",
+        "name": "Sailing Ship",
+        "price": 690,
+        "subtitle": "Steel sails, a pennant, and a hull that never leaks",
+        "description": "A tall ship with sheet-steel sails and a flag at the masthead, mounted on a round base. Stands about as high as a bottle of wine and looks better on the table.",
+        "materials": "Sheet steel, round bar, steel base"
+      },
+      "busy": 1.7,
+      "crop": [
+        0.15,
+        0.05,
+        0.9,
+        0.93
+      ],
+      "aspect": "portrait"
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.10.59.jpeg",
+      "image": "shell-chopper.jpg",
+      "box": [
+        0.02,
+        0.15,
+        0.98,
+        0.8
+      ],
+      "product": {
+        "slug": "shell-chopper",
+        "name": "Shell Chopper",
+        "price": 590,
+        "subtitle": "A motorbike with seashell fenders and pebbles for cargo",
+        "description": "A chopper whose fenders are two scallop-shell dishes filled with beach pebbles and a tiny anchor. Beach holiday and biker fantasy in one object.",
+        "materials": "Steel shell dishes, spoons, bolts, pebbles"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.00.jpeg",
+      "image": "pliers-donkey.jpg",
+      "box": [
+        0.05,
+        0.2,
+        0.95,
+        0.85
+      ],
+      "product": {
+        "slug": "pliers-donkey",
+        "name": "Pliers Donkey",
+        "price": 440,
+        "subtitle": "The head is a pair of pliers. So are the ears.",
+        "description": "A donkey with a pliers head, a spring body and the stubborn stance of the real thing. Will not be moved; is not meant to be.",
+        "materials": "Pliers, coil spring, bolts, hex nuts"
+      },
+      "busy": 1.3
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.01.jpeg",
+      "image": "drinking-buddies.jpg",
+      "box": [
+        0.05,
+        0.08,
+        0.95,
+        0.92
+      ],
+      "product": {
+        "slug": "drinking-buddies",
+        "name": "Drinking Buddies — bottle holder",
+        "price": 640,
+        "subtitle": "Two friends, two bottles, one long evening",
+        "description": "Two figures leaning back to hold your bottles at exactly the angle of a good night. Holds two standard bottles; the friends are included, the drinks are not.",
+        "materials": "Steel rod, steel band"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.02.jpeg",
+      "image": "sisyphus.jpg",
+      "box": [
+        0.05,
+        0.05,
+        0.98,
+        0.9
+      ],
+      "product": {
+        "slug": "sisyphus",
+        "name": "Sisyphus",
+        "price": 540,
+        "subtitle": "One man, one rock, no end in sight",
+        "description": "Bent under a real rock, forever pushing it up the plate. Genka made this after a double shift. He says it is not autobiographical. Nobody believes him.",
+        "materials": "Steel rod, natural stone, polished steel base"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.05.jpeg",
+      "image": "money-tap.jpg",
+      "box": [
+        0.15,
+        0.05,
+        0.85,
+        0.95
+      ],
+      "product": {
+        "slug": "money-tap",
+        "name": "Money Tap",
+        "price": 540,
+        "subtitle": "A brass valve that pours coins",
+        "description": "A real brass valve with a red handwheel, and out of it a stream of coins landing in a pile. The most requested piece by far, for reasons everybody understands.",
+        "materials": "Brass valve, steel, coins"
+      },
+      "busy": 1.4,
+      "crop": [
+        0.12,
+        0.02,
+        0.88,
+        0.98
+      ],
+      "aspect": "portrait"
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.06.jpeg",
+      "image": "him-and-her.jpg",
+      "box": [
+        0.02,
+        0.05,
+        0.98,
+        0.95
+      ],
+      "product": {
+        "slug": "him-and-her",
+        "name": "Him & Her",
+        "price": 640,
+        "subtitle": "Spoon bodies, fork hair, a chain and a ribbon",
+        "description": "He has a chain necklace and spiky hair; she has fork-tine curls and a ribbon. Sold as a pair. They have been standing next to each other for a long time and are used to it.",
+        "materials": "Spoons, forks, chain, sheet steel"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.07.jpeg",
+      "image": "thirsty-squirrel.jpg",
+      "box": [
+        0.1,
+        0.15,
+        0.95,
+        0.85
+      ],
+      "product": {
+        "slug": "thirsty-squirrel",
+        "name": "Thirsty Squirrel",
+        "price": 490,
+        "subtitle": "A fork for a tail, a bottle instead of a nut",
+        "description": "A squirrel with a bushy fork tail, clutching a tiny bottle where the acorn should be. The bottle is included. What goes in it is up to you.",
+        "materials": "Spoons, forks, steel rod, miniature bottle"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.08.jpeg",
+      "image": "nut-giraffe.jpg",
+      "box": [
+        0.3,
+        0.1,
+        0.95,
+        0.95
+      ],
+      "product": {
+        "slug": "nut-giraffe",
+        "name": "Nut Giraffe",
+        "price": 540,
+        "subtitle": "Hex nuts, a long neck, and a cat for scale",
+        "description": "A giraffe built entirely from hex nuts, tall enough that the household cat had to come and inspect it. The cat is not included.",
+        "materials": "Hex nuts, bolts, steel rod"
+      },
+      "busy": 1.3
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.09.jpeg",
+      "image": "lucky-horse.jpg",
+      "box": [
+        0.05,
+        0.15,
+        0.95,
+        0.9
+      ],
+      "product": {
+        "slug": "lucky-horse",
+        "name": "Lucky Horse",
+        "price": 540,
+        "subtitle": "A red horse leaping through a horseshoe",
+        "description": "A bright red horse mid-jump through a horseshoe, on a polished steel base. Two kinds of luck in one, painted the colour of a good mood.",
+        "materials": "Horseshoe, steel rod, sheet steel, enamel paint, polished base"
+      },
+      "busy": 1.2
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.10.jpeg",
+      "image": "home-sign.jpg",
+      "box": [
+        0.02,
+        0.35,
+        0.98,
+        0.7
+      ],
+      "product": {
+        "slug": "home-sign",
+        "name": "HOME",
+        "price": 490,
+        "subtitle": "Four letters from bolts, nuts and one ball bearing",
+        "description": "The word HOME in bolts, nuts and a ball bearing for the O. Stands on its own on a shelf or mantelpiece and says exactly what it means.",
+        "materials": "Steel bolts, hex nuts, ball bearing"
+      },
+      "busy": 1.6,
+      "crop": [
+        0.0,
+        0.42,
+        1.0,
+        0.78
+      ]
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.11.jpeg",
+      "image": "crowned-eagle.jpg",
+      "box": [
+        0.05,
+        0.05,
+        0.98,
+        0.95
+      ],
+      "product": {
+        "slug": "crowned-eagle",
+        "name": "The Crowned Eagle",
+        "price": 790,
+        "subtitle": "Knife-blade wings, a spoon body and a golden crown",
+        "description": "Wings of table knives fanned out mid-flight, a body of polished spoons, and a small gold crown. The largest bird in the collection and the piece people photograph first.",
+        "materials": "Table knives, spoons, brass crown, steel rod"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.12.jpeg",
+      "image": "lion-king.jpg",
+      "box": [
+        0.1,
+        0.1,
+        0.95,
+        0.92
+      ],
+      "product": {
+        "slug": "lion-king",
+        "name": "Lion King",
+        "price": 790,
+        "subtitle": "A mane of chain, a crown, and gilded legs",
+        "description": "A lion with a mane of heavy chain, a gold crown, and legs made from gilded spoon handles. Stands like it owns the room, because it does.",
+        "materials": "Steel chain, hex nuts, gilded spoon handles, brass crown"
+      }
+    },
+    {
+      "file": "WhatsApp Image 2026-09-29 at 07.11.13.jpeg",
+      "image": "three-wise-monkeys.jpg",
+      "box": [
+        0.02,
+        0.25,
+        0.98,
+        0.9
+      ],
+      "product": {
+        "slug": "three-wise-monkeys",
+        "name": "Three Wise Monkeys",
+        "price": 690,
+        "subtitle": "See no evil, hear no evil, speak no evil — under a palm of forks",
+        "description": "The three monkeys of the proverb, built from bolts and nuts, sitting under a palm tree of forks, with an evil-eye bead for insurance. Office-appropriate wisdom.",
+        "materials": "Steel bolts, hex nuts, forks, glass bead, steel plate"
+      }
+    }
+  ],
+  "existing_products": {
+    "_comment": "The three insects from the first photo keep their pictures; prices are re-set to the new range.",
+    "ladybird-in-red": 390,
+    "wrench-legged-beetle": 440,
+    "shower-head-spider": 390
+  }
+}

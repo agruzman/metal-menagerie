@@ -2,8 +2,18 @@
 
 <div class="wrap">
   <section class="product">
-    <div class="shot">
-      <img src="<%= product.image || '/uploads/group.jpg' %>" alt="<%= product.name %>">
+    <div>
+      <div class="shot">
+        <img id="mainShot" src="<%= product.image || '/uploads/group.jpg' %>" alt="<%= product.name %>">
+      </div>
+      <% if (product.gallery && product.gallery.length) { %>
+        <div class="gallery">
+          <button type="button" class="on" data-src="<%= product.image %>"><img src="<%= thumb(product.image) %>" alt=""></button>
+          <% product.gallery.forEach(function (g) { %>
+            <button type="button" data-src="<%= g %>"><img src="<%= thumb(g) %>" alt="Another view of <%= product.name %>"></button>
+          <% }) %>
+        </div>
+      <% } %>
     </div>
 
     <div>
@@ -15,27 +25,26 @@
       <p><%= product.description %></p>
 
       <% if (product.stock > 0) { %>
-        <form method="post" action="/cart/add" style="display:flex;gap:12px;align-items:center;margin-top:26px">
+        <form method="post" action="/cart/add" style="display:flex;gap:12px;align-items:center;margin-top:26px;flex-wrap:wrap">
           <input type="hidden" name="product_id" value="<%= product.id %>">
-          <input class="qty" type="number" name="qty" value="1" min="1" max="<%= product.stock %>" aria-label="Quantity">
-          <button class="btn" type="submit">Add to cart</button>
-          <span class="small muted">
-            <%= product.stock %> available
-          </span>
+          <input type="hidden" name="qty" value="1">
+          <button class="btn" type="submit">Order this piece</button>
+          <span class="small muted">Only one exists. No payment until we confirm it is yours.</span>
         </form>
       <% } else { %>
         <p class="notice bad" style="margin-top:26px">
-          This one has sold. Write to <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a>
-          if you would like something similar made.
+          This one has found a home. Write to <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a>
+          if you would like something in the same spirit made for you.
         </p>
       <% } %>
 
       <div class="spec">
         <dl>
-          <% if (product.materials) { %><dt>Materials</dt><dd><%= product.materials %></dd><% } %>
+          <% if (product.materials) { %><dt>Made from</dt><dd><%= product.materials %></dd><% } %>
           <% if (product.dimensions) { %><dt>Size</dt><dd><%= product.dimensions %></dd><% } %>
           <% if (product.weight_grams) { %><dt>Weight</dt><dd><%= product.weight_grams %> g</dd><% } %>
-          <dt>Shipping</dt><dd>Dispatched within 3 working days, boxed and foam-wrapped.</dd>
+          <dt>Made by</dt><dd><a href="/genka">Genka</a>, by hand, in Israel</dd>
+          <dt>Shipping</dt><dd>Boxed in foam, tracked and insured, to Europe, the USA, the Emirates and Israel. <a href="/policies">Rates</a></dd>
         </dl>
       </div>
     </div>
@@ -52,5 +61,15 @@
     </section>
   <% } %>
 </div>
+
+<script>
+  document.querySelectorAll('.gallery button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.getElementById('mainShot').src = b.dataset.src;
+      document.querySelectorAll('.gallery button').forEach(function (x) { x.classList.remove('on'); });
+      b.classList.add('on');
+    });
+  });
+</script>
 
 <%- include('partials/foot') %>

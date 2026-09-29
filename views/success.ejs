@@ -6,11 +6,35 @@
     <p class="muted">We couldn't find that order. If you were charged, email
       <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a> and it will be sorted out.</p>
     <p><a class="btn ghost" href="/shop">Back to the shop</a></p>
+
   <% } else if (order.status === 'pending') { %>
     <h1>Payment is being confirmed</h1>
     <p class="muted">Order <span class="mono"><%= order.ref %></span> is still
       settling. Refresh this page in a moment — you will get a confirmation email
       either way.</p>
+
+  <% } else if (order.status === 'requested') { %>
+    <div class="eyebrow">Request <%= order.ref %></div>
+    <h1>Got it. Thank you.</h1>
+    <p>Your request has reached the workshop. Because every piece exists exactly once,
+      we first check it is still on the shelf — then you will hear from us at
+      <strong><%= order.email %></strong> within a day, with the exact shipping cost to
+      <%= order.address && order.address.country ? countryName(order.address.country) : 'you' %> and how to pay.
+      Nothing has been charged.</p>
+
+    <table class="lines" style="margin-top:30px">
+      <tbody>
+        <% order.items.forEach(function (i) { %>
+          <tr><td><%= i.name %></td><td class="right"><%= money(i.price_cents * i.qty) %></td></tr>
+        <% }) %>
+        <tr><td>Shipping (estimate)</td><td class="right"><%= money(order.shipping_cents) %></td></tr>
+        <tr><td><strong>Estimated total</strong></td><td class="right"><strong><%= money(order.total_cents) %></strong></td></tr>
+      </tbody>
+    </table>
+    <p class="small muted" style="margin-top:14px">Questions in the meantime:
+      <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a></p>
+    <p style="margin-top:30px"><a class="btn ghost" href="/shop">Keep looking</a></p>
+
   <% } else { %>
     <div class="eyebrow">Order <%= order.ref %></div>
     <h1>Thank you.</h1>

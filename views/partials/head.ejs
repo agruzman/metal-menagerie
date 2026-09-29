@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %><%= settings.store_name %></title>
 <meta name="description" content="<%= settings.tagline %>">
+<meta property="og:title" content="<%= typeof title !== 'undefined' ? title + ' · ' : '' %><%= settings.store_name %>">
+<meta property="og:description" content="<%= settings.tagline %>">
+<meta property="og:image" content="<%= baseUrl %><%= typeof ogImage !== 'undefined' ? ogImage : '/uploads/crowned-eagle.jpg' %>">
 <link rel="stylesheet" href="/css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>🪲</text></svg>">
 </head>
@@ -13,10 +16,10 @@
   <div class="wrap">
     <a class="brand" href="/">Metal<span>·</span>Menagerie</a>
     <nav class="nav">
-      <a href="/shop" class="<%= path.startsWith('/shop') || path.startsWith('/product') ? 'on' : '' %>">Shop</a>
-      <a href="/about" class="<%= path === '/about' ? 'on' : '' %>">The workshop</a>
+      <a href="/shop" class="<%= path.startsWith('/shop') || path.startsWith('/product') ? 'on' : '' %>">The collection</a>
+      <a href="/genka" class="<%= path === '/genka' || path === '/about' ? 'on' : '' %>">Genka</a>
       <a href="/policies" class="<%= path === '/policies' ? 'on' : '' %>">Shipping</a>
-      <a class="cart-pill" href="/cart">Cart <b><%= cartCount %></b></a>
+      <a class="cart-pill" href="/cart">Order <b><%= cartCount %></b></a>
     </nav>
   </div>
 </header>

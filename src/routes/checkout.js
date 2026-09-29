@@ -6,9 +6,13 @@
  * address, then tells us the result. That is what keeps you out of PCI
  * compliance work, and it is why this file is short.
  *
- * If STRIPE_SECRET_KEY is missing, the shop falls back to DEMO MODE: a plain
- * form that records a real order without charging anything, so you can test
- * the whole flow before you ever sign up to Stripe.
+ * Without STRIPE_SECRET_KEY the shop runs in ORDER-REQUEST mode instead: the
+ * buyer fills in who they are and where the piece should go, the order is
+ * recorded, and an email goes to the shop owner (and a confirmation to the
+ * buyer). Payment is then arranged by reply — PayPal, bank transfer, whatever
+ * suits — and the owner marks the order paid in the admin panel. For pieces
+ * that exist exactly once, this "ask first" flow also avoids selling the same
+ * piece twice.
  */
 const express = require('express');
 const { products, orders, getSettings } = require('../db');
@@ -17,10 +21,11 @@ const {
   clearCart,
   cartToItems,
   shippingOptions,
-  shippingOptionById,
+  shippingFor,
   money,
 } = require('../helpers');
-const { sendOrderEmails } = require('../mailer');
+const { SHIP_TO, BY_CODE } = require('../countries');
+const { sendOrderEmails, sendOrderRequestEmails } = require('../mailer');
 
 const router = express.Router();
 
@@ -59,7 +64,7 @@ router.post('/checkout', async (req, res, next) => {
 
     const items = cartToItems(cart.lines);
     const order = orders.create({
-      provider: LIVE ? 'stripe' : 'demo',
+      provider: LIVE ? 'stripe' : 'request',
       status: 'pending',
       items,
       subtotal_cents: cart.subtotal_cents,
@@ -68,7 +73,7 @@ router.post('/checkout', async (req, res, next) => {
     });
 
     if (!LIVE) {
-      return res.redirect(`/checkout/demo/${order.ref}`);
+      return res.redirect(`/order/details/${order.ref}`);
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -120,48 +125,86 @@ router.post('/checkout', async (req, res, next) => {
 });
 
 /* ------------------------------------------------------------------ *
- * Demo mode checkout (only when Stripe is not configured)             *
+ * Order request (when Stripe is not configured)                       *
  * ------------------------------------------------------------------ */
 
-router.get('/checkout/demo/:ref', (req, res, next) => {
+function requestForm(res, order, values = {}, error = '') {
+  const settings = getSettings();
+  const country = values.country || settings.country;
+  return res.status(error ? 400 : 200).render('order_form', {
+    order,
+    values,
+    error,
+    countries: SHIP_TO,
+    estimate: shippingFor(country, order.subtotal_cents, settings),
+    options: shippingOptions(order.subtotal_cents, settings),
+  });
+}
+
+router.get('/order/details/:ref', (req, res, next) => {
   if (LIVE) return next();
   const order = orders.byRef(req.params.ref);
   if (!order || order.status !== 'pending') return res.redirect('/cart');
-  res.render('checkout_demo', {
-    order,
-    options: shippingOptions(order.subtotal_cents),
-  });
+  requestForm(res, order);
 });
 
-router.post('/checkout/demo/:ref', async (req, res, next) => {
+router.post('/order/details/:ref', async (req, res, next) => {
   try {
     if (LIVE) return next();
     const order = orders.byRef(req.params.ref);
     if (!order || order.status !== 'pending') return res.redirect('/cart');
 
     const b = req.body;
-    const option = shippingOptionById(b.shipping, order.subtotal_cents);
+    const v = {
+      name: String(b.name || '').trim(),
+      email: String(b.email || '').trim(),
+      phone: String(b.phone || '').trim(),
+      country: String(b.country || '').trim().toUpperCase(),
+      city: String(b.city || '').trim(),
+      line1: String(b.line1 || '').trim(),
+      line2: String(b.line2 || '').trim(),
+      state: String(b.state || '').trim(),
+      postal_code: String(b.postal_code || '').trim(),
+      notes: String(b.notes || '').trim().slice(0, 2000),
+    };
 
-    orders.markPaid(order.id, {
-      email: b.email,
-      customer_name: b.name,
-      phone: b.phone,
+    if (!v.name) return requestForm(res, order, v, 'Please tell us your name.');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) {
+      return requestForm(res, order, v, 'That email address does not look right.');
+    }
+    if (v.phone.replace(/\D/g, '').length < 6) {
+      return requestForm(res, order, v, 'Please add a phone number we can reach you on.');
+    }
+    if (!BY_CODE[v.country]) {
+      return requestForm(res, order, v, 'Sorry — we only ship to Europe, the USA, the Emirates and Israel.');
+    }
+    if (!v.line1 || !v.city) return requestForm(res, order, v, 'We need a street address and a city.');
+
+    // The piece may have been requested by someone else in the meantime.
+    const problem = stockProblem({ lines: order.items.map((i) => ({ product: i, qty: i.qty })) });
+    if (problem) return res.redirect('/cart?msg=' + encodeURIComponent(problem));
+
+    const ship = shippingFor(v.country, order.subtotal_cents);
+    orders.saveRequest(order.id, {
+      email: v.email,
+      customer_name: v.name,
+      phone: v.phone,
       address: {
-        line1: b.line1,
-        line2: b.line2,
-        city: b.city,
-        state: b.state,
-        postal_code: b.postal_code,
-        country: b.country,
+        line1: v.line1,
+        line2: v.line2,
+        city: v.city,
+        state: v.state,
+        postal_code: v.postal_code,
+        country: v.country,
       },
-      shipping_cents: option.cents,
-      total_cents: order.subtotal_cents + option.cents,
-      shipping_label: option.label,
-      provider_ref: 'demo-' + order.ref,
+      shipping_cents: ship.cents,
+      total_cents: order.subtotal_cents + ship.cents,
+      shipping_label: ship.label,
+      notes: v.notes,
     });
 
-    const finished = orders.byRef(order.ref);
-    await sendOrderEmails(finished);
+    const saved = orders.byRef(order.ref);
+    await sendOrderRequestEmails(saved);
     clearCart(req);
     res.redirect(`/order/success?ref=${order.ref}`);
   } catch (err) {

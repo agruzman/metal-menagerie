@@ -1,10 +1,12 @@
-# Metal Menagerie — a small shop that sells handmade metal statues
+# Metal Menagerie — Genka's handmade metal creatures, for sale
 
-A complete, self-contained online shop: a catalogue, a cart, real card
-payments, shipping choices, stock that counts itself down, order emails and a
-password-protected back office for running the whole thing.
+A complete, self-contained online shop for 40 one-of-a-kind welded sculptures:
+a catalogue with processed photos, an artist page, a cart, an order-request
+flow that emails the owner, stock that marks a piece sold, and a
+password-protected back office for running the whole thing. Card payments
+(Stripe) are wired in for later.
 
-It is deliberately small: eight JavaScript files and a folder of templates.
+It is deliberately small: nine JavaScript files and a folder of templates.
 Everything lives in one SQLite database — a file on your laptop, or a free
 hosted one when the shop is online — and it runs for $0 a month (section 5).
 
@@ -33,13 +35,13 @@ SESSION_SECRET=any-long-random-gibberish
 
 Stop the server with `Ctrl-C`. Restart it with `npm start`.
 
-> **Demo mode.** With no Stripe keys in `.env`, checkout still works end to
-> end — a plain address form stands in for the card page, the order is
-> recorded and stock goes down, but nothing is charged. Use it to try the
-> whole flow before you sign up to anything.
+> **No card payments yet — by design.** Without Stripe keys the shop takes
+> *order requests*: the buyer leaves contact details and an address, you get
+> an email, and you arrange payment by reply (section 3). Set up the email
+> sending in section 7 or the requests only appear in the admin panel.
 
-Run `npm test` at any point to check the money and stock logic still behaves
-(33 assertions, runs in a second, uses a throwaway database).
+Run `npm test` at any point to check the money, catalogue and stock logic
+still behaves (54 assertions, runs in a second, uses a throwaway database).
 
 ---
 
@@ -52,11 +54,15 @@ src/helpers.js       money, cart and shipping arithmetic
 src/sqlite.js        opens the database (local file, or Turso when hosted)
 src/paths.js         where the local database lives
 src/mailer.js        order emails
-src/routes/shop.js     the public pages and the cart
-src/routes/checkout.js payment, shipping, the Stripe webhook
+src/countries.js     where the shop ships (Europe, USA, Emirates, Israel)
+src/catalog.json     the 40 pieces: names, blurbs, prices, photos
+src/routes/shop.js     the public pages, the artist page and the cart
+src/routes/checkout.js the order form, Stripe checkout & webhook (for later)
 src/routes/admin.js    everything under /admin
 views/               the HTML templates
-public/              stylesheet and the four starter photos
+public/uploads/      the processed photos (1200px + 600px thumbnails)
+tools/process_photos.py  turns phone snapshots into those photos
+products/            the original snapshots (kept off Git)
 data/shop.db         your entire shop, in one file  ← back this up
 deploy.sh            puts the shop online for $0 (section 5)
 render.yaml          tells Render how to run it
@@ -94,19 +100,71 @@ list of your stock with `+` / `−` buttons. When you finish a new piece, press
 say how many exist. Untick *Show this piece in the shop* to keep a draft
 hidden. Photos are best square, shot on a plain surface in daylight.
 
-**Orders** — open one and you get the address, a packing slip to copy into the
-box, and a status dropdown. Set it to **shipped**, paste in a tracking number,
-and the buyer is emailed automatically. Set it to **cancelled** or
-**refunded** and the items go back into stock on their own. (Refunding the
-*money* is a separate click in your Stripe dashboard — this only fixes your
-inventory.)
+**Orders** — open one and you get the buyer's name, email, phone and address,
+a packing slip to copy into the box, and a status dropdown. A new order arrives
+as **requested** (see below). Set it to **paid** once the money is in — that
+takes the piece off the shelf. Set it to **shipped**, paste in a tracking
+number, and the buyer is emailed automatically. **cancelled** or **refunded**
+puts the piece back on sale.
 
 **Settings** — shop name, currency, shipping prices, which countries you post
 to, free-shipping threshold, and the shipping/returns text. No code involved.
 
+### How an order works right now (no card payments yet)
+
+Every piece exists exactly once, so the shop does not take money at checkout.
+Instead:
+
+1. The buyer picks a piece, fills in name, email, phone and shipping address
+   (the country list is Europe, USA, Emirates and Israel only) and presses
+   **Send order request**.
+2. Two emails go out: one to **alex.gruzman@gmail.com** with every detail and
+   *Reply-To* set to the buyer, one to the buyer confirming receipt.
+3. You reply within a day: "still available, total is $X including shipping,
+   here is how to pay" (PayPal invoice, PayPal.me link, bank transfer).
+4. When the money lands, open the order in `/admin/orders` and set **paid**.
+   The piece disappears from the shop. Post it, set **shipped**.
+
+For this to work the shop needs to be able to send email — see section 7. Until
+then requests still land in `/admin/orders`; only the emails are missing.
+
+### The catalogue and the photos
+
+The 40 pieces live in `src/catalog.json` — names, blurbs, prices, and which
+photo belongs to which piece. On every start the shop adds any piece from that
+file it does not have yet, so editing the file and redeploying adds pieces
+without touching anything you changed in the admin panel.
+
+Photos were processed from the phone snapshots in `products/` by
+`tools/process_photos.py` (finds the sculpture, crops, softens the background,
+sharpens, writes a 1200px image and a 600px thumbnail into `public/uploads`).
+To add a piece: drop the photo into `products/`, add an entry to
+`src/catalog.json`, run `python3 tools/process_photos.py`, push.
+
+Sizes and weights are not filled in — nobody has measured the pieces yet. Add
+them in the admin panel when you have a ruler handy.
+
 ---
 
-## 4. Turning on real card payments
+## 4. Taking card payments later
+
+**Stripe does not open accounts for businesses based in Israel**, so the Stripe
+code in this repo only helps if the seller has a company and bank account in a
+supported country. For a maker in Israel shipping to Europe, the USA and the
+Emirates, the realistic options are:
+
+| Option | Cost per sale | Effort | Notes |
+|---|---|---|---|
+| **PayPal Business (Israel)** — send an invoice or a PayPal.me link in the reply email | ~4.4% + fixed fee on international payments, +3% if you convert currency | none — no code | Buyers pay by PayPal *or card* without an account; you withdraw to an Israeli bank. Buyer protection reassures strangers. **Start here.** |
+| PayPal Checkout buttons on the order form | same fees | an afternoon of code | Same money, one fewer email. Worth it once orders are regular. |
+| Bank transfer / Wise | ~$0–5 | none | Cheapest for the seller; fine for European buyers, awkward for Americans. Offer it alongside PayPal. |
+| Israeli card gateway (Tranzila, Cardcom, PayPlus…) | ~1.5–2.5% + monthly fee (~₪50–100) | a day of code + paperwork | Only makes sense past a few thousand dollars a month. |
+
+Recommendation: open a **PayPal Business** account, put the PayPal.me link in
+the reply template, and revisit buttons-on-the-site after the first twenty
+orders. Fees stay proportional to sales — nothing to pay in a quiet month.
+
+### If the seller is in a Stripe country
 
 1. Create an account at [stripe.com](https://stripe.com). It is free to open;
    they take a cut per sale rather than a monthly fee. You will be asked for
@@ -226,7 +284,7 @@ leave `TURSO_DATABASE_URL` empty, attach a disk at `/var/data`, and set
 | Server | $0 on Render's free tier (or $7/mo for one that never needs the keep-alive) |
 | Database | $0 on Turso's free plan |
 | Domain name | roughly $12 a year — optional, the `.onrender.com` address works |
-| Stripe | no monthly fee — around **2.9% + 30¢** per successful card payment in the US; rates differ by country, so check [stripe.com/pricing](https://stripe.com/pricing) for yours |
+| Payments | no monthly fee — PayPal takes roughly **4.4% + a fixed fee** on an international sale (see section 4); bank transfers are near-free |
 | Email | free with a Gmail app password, or ~$1/mo for a proper sending service |
 
 So: a few dollars a month, plus a slice of each sale. For comparison, hosted
@@ -241,25 +299,32 @@ to run two commands and press deploy, this is cheaper and entirely his.
 
 ---
 
-## 7. Email receipts (optional)
+## 7. Email — needed for order requests
 
-Leave the `SMTP_*` lines in `.env` empty and emails are just printed in the
-terminal — handy while testing. To send real ones with Gmail:
+The order flow (section 3) lives on email, so this is the one optional-looking
+step that is not optional. Until it is done, requests still appear in
+`/admin/orders`, but nobody gets notified.
 
-1. Turn on 2-step verification on the Google account.
-2. Create an **App password** (Google Account → Security → App passwords).
-3. Fill in `.env`:
+With the Gmail account **alex.gruzman@gmail.com** (about three minutes):
+
+1. Turn on 2-step verification for the Google account
+   (myaccount.google.com → Security).
+2. Create an **App password**: myaccount.google.com/apppasswords → name it
+   "shop" → copy the 16-character code.
+3. Add these to the shop's environment — on Render: service → *Environment* →
+   *Add Environment Variable*, one row each (locally, the same lines in `.env`):
 
    ```
    SMTP_HOST=smtp.gmail.com
    SMTP_PORT=465
-   SMTP_USER=you@gmail.com
+   SMTP_USER=alex.gruzman@gmail.com
    SMTP_PASS=the-16-character-app-password
-   MAIL_FROM=you@gmail.com
+   MAIL_FROM=alex.gruzman@gmail.com
    ```
 
-Set *Contact email* in admin settings to wherever you want new-order
-notifications to land.
+*Contact email* in admin → Settings decides where new-order notifications
+land; it is `alex.gruzman@gmail.com` by default. Gmail allows about 500
+messages a day, which is more orders than the shelf can hold.
 
 ---
 

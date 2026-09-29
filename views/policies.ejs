@@ -1,12 +1,19 @@
-<%- include('partials/head', { title: 'Shipping & returns' }) %>
+<%- include('partials/head', { title: 'Shipping & payment' }) %>
 
 <div class="wrap section narrow">
   <div class="eyebrow">Small print</div>
-  <h1>Shipping &amp; returns</h1>
+  <h1>Shipping, payment &amp; returns</h1>
 
   <p><%= settings.policies %></p>
 
-  <h2 style="margin-top:40px">Rates</h2>
+  <h2 style="margin-top:40px">How ordering works</h2>
+  <p>Every piece exists exactly once, so ordering is a short conversation rather
+  than a checkout. You pick a piece and tell us where it should go; within a day
+  we confirm it is still on the shelf and send the exact total with the shipping
+  cost and the ways to pay. Once the payment lands, it is packed and posted with
+  tracking — and the piece is marked sold on the site.</p>
+
+  <h2 style="margin-top:40px">Shipping estimates</h2>
   <table class="lines" style="margin-top:14px">
     <tbody>
       <% options.forEach(function (o) { %>
@@ -18,15 +25,16 @@
       <% if (Number(settings.free_shipping_over_cents) > 0) { %>
         <tr>
           <td>Orders over <%= money(settings.free_shipping_over_cents) %></td>
-          <td class="right">Free within <%= settings.country %></td>
+          <td class="right">Free within <%= countryName(settings.country) %></td>
         </tr>
       <% } %>
     </tbody>
   </table>
+  <p class="small muted">Everything is sent from Israel, tracked and insured. Larger pieces may cost a little more to post; you will know before you pay.</p>
 
   <h2 style="margin-top:40px">Payment</h2>
-  <p>Cards are handled by Stripe. Card numbers are entered on Stripe's own page
-  and are never stored on this website.</p>
+  <p>We confirm the ways to pay in our reply — typically PayPal (which also takes
+  cards) or a bank transfer. No card details are ever entered on this website.</p>
 
   <h2 style="margin-top:40px">Questions</h2>
   <p><a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a></p>

@@ -103,11 +103,11 @@ router.use(requireAdmin);
 
 router.get('/', (req, res) => {
   const settings = getSettings();
-  const low = Number(settings.low_stock_threshold || 2);
+  const low = Number(settings.low_stock_threshold) || 0; // 0 = warning off
   res.render('admin/dashboard', {
     stats: orders.stats(),
     recent: orders.list({ limit: 8 }),
-    lowStock: products.all().filter((p) => p.active && p.stock <= low),
+    lowStock: low > 0 ? products.all().filter((p) => p.active && p.stock <= low) : [],
     catalogue: products.all(),
     layoutAdmin: true,
   });
@@ -158,6 +158,8 @@ function readProductForm(req, existing) {
     weight_grams: Math.max(0, parseInt(b.weight_grams, 10) || 0),
     active: b.active ? 1 : 0,
     sort_order: parseInt(b.sort_order, 10) || 0,
+    // extra photos are managed by the catalogue file; keep whatever is there
+    gallery: existing ? existing.gallery : [],
   };
 }
 
@@ -252,6 +254,13 @@ router.post('/orders/:id', async (req, res, next) => {
       tracking: req.body.tracking ?? null,
       notes: req.body.notes ?? null,
     });
+
+    // Money arrived (by PayPal, transfer, cash…): take the piece off the shelf.
+    // markPaid is idempotent, so an order already paid is left alone.
+    if (['paid', 'shipped'].includes(status) && order.stock_applied === 0) {
+      orders.markPaid(order.id, {});
+      if (status === 'shipped') orders.setStatus(order.id, 'shipped', {});
+    }
 
     // Restock if an order is cancelled or refunded after being paid.
     if (

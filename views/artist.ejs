@@ -1,0 +1,41 @@
+<%- include('partials/head', { title: 'Genka', ogImage: '/uploads/genka.jpg' }) %>
+
+<div class="wrap section">
+  <div class="artist">
+    <div class="portrait">
+      <img src="/uploads/genka.jpg" alt="Genka, the maker">
+      <p class="small muted center" style="margin-top:10px">Genka. Not at the factory, for once.</p>
+    </div>
+
+    <div class="bio">
+      <div class="eyebrow">The maker</div>
+      <h1>Genka</h1>
+
+      <p>Born in Ukraine, lives in Israel, works as a welder — <em>сварщик</em>, if you want
+      the word he would use — at a steel factory. Two children, one grandchild, and until
+      fairly recently no idea that he was an artist.</p>
+
+      <p>That part arrived late, and by accident. A bolt that was not needed, a spring that
+      was, a slow half-hour at the end of a shift — and suddenly a small dog was looking up at
+      him from the workbench. He welded it a tail. He has not really stopped since.</p>
+
+      <p>Everything here was made in the hours that are not work and not family, out of spoons,
+      chain, bearings, tools that broke and hardware that was never used. Nothing is drawn
+      first. A piece starts with whatever is lying around and is finished when it starts
+      looking back at him. Ask him what a sculpture <em>means</em> and he will tell you what
+      it is made of.</p>
+
+      <p>He makes them because they make him laugh, and because a clean weld is its own kind of
+      beauty. He would like them to go and live somewhere else now — partly so there is room on
+      the shelf, mostly so that the grinding discs, the gas and the steel for the next creature
+      pay for themselves. Every piece exists exactly once.</p>
+
+      <p class="muted">Have a broken tool with a story? He can probably turn it into an animal.
+      Write to <a href="mailto:<%= settings.contact_email %>"><%= settings.contact_email %></a>.</p>
+
+      <p style="margin-top:30px"><a class="btn" href="/shop">See the collection</a></p>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/foot') %>

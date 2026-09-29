@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS products (
   weight_grams  INTEGER NOT NULL DEFAULT 0,
   active        INTEGER NOT NULL DEFAULT 1,
   sort_order    INTEGER NOT NULL DEFAULT 0,
+  gallery_json  TEXT NOT NULL DEFAULT '[]',
   created_at    TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
@@ -39,7 +40,9 @@ CREATE TABLE IF NOT EXISTS orders (
   ref             TEXT NOT NULL UNIQUE,
   provider        TEXT NOT NULL DEFAULT 'stripe',
   provider_ref    TEXT NOT NULL DEFAULT '',
-  status          TEXT NOT NULL DEFAULT 'pending',  -- pending | paid | shipped | cancelled | refunded
+  -- pending (checkout started) | requested (order form sent, awaiting payment)
+  -- | paid | shipped | cancelled | refunded
+  status          TEXT NOT NULL DEFAULT 'pending',
   email           TEXT NOT NULL DEFAULT '',
   customer_name   TEXT NOT NULL DEFAULT '',
   phone           TEXT NOT NULL DEFAULT '',
@@ -69,32 +72,49 @@ CREATE TABLE IF NOT EXISTS images (
 );
 `);
 
+// Columns added after the first release. "ADD COLUMN" fails harmlessly when
+// the column already exists, which is the only way to ask on every backend.
+for (const sql of [
+  "ALTER TABLE products ADD COLUMN gallery_json TEXT NOT NULL DEFAULT '[]'",
+]) {
+  try {
+    db.exec(sql);
+  } catch {
+    /* already there */
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /* Settings — small key/value bag you can edit from the admin panel.   */
 /* ------------------------------------------------------------------ */
 
+const { SHIP_TO } = require('./countries');
+
 const DEFAULT_SETTINGS = {
   store_name: 'Metal Menagerie',
-  tagline: 'Small creatures, forged by hand from salvaged metal.',
+  tagline: 'Creatures and characters welded by hand from salvaged steel — each one made exactly once.',
   intro:
-    'Every piece is made one at a time from bolts, spoons, wrenches and other ' +
-    'rescued hardware. No two are identical, and when one is gone, it is gone.',
-  contact_email: 'hello@example.com',
+    'Genka builds these in the corner of a steel factory in Israel, after his ' +
+    'shift, out of spoons, bolts, chain and whatever else was heading for the ' +
+    'scrap bin. Every piece exists exactly once. When it is gone, it is gone.',
+  contact_email: 'alex.gruzman@gmail.com',
   currency: 'usd',
   currency_symbol: '$',
-  country: 'US',
-  ship_countries: 'US,CA,GB,IE,FR,DE,NL,BE,ES,IT,PT,SE,DK,NO,FI,PL,CZ,AT,CH,AU,NZ,IL',
-  ship_domestic_label: 'Standard shipping (3-7 business days)',
-  ship_domestic_cents: '800',
-  ship_intl_label: 'International shipping (7-21 business days)',
-  ship_intl_cents: '2400',
-  free_shipping_over_cents: '15000',
-  low_stock_threshold: '2',
+  country: 'IL',
+  ship_countries: SHIP_TO.map((c) => c.code).join(','),
+  ship_domestic_label: 'Within Israel (2-5 business days)',
+  ship_domestic_cents: '1500',
+  ship_intl_label: 'Europe, USA & Emirates — insured, tracked (7-14 business days)',
+  ship_intl_cents: '3900',
+  free_shipping_over_cents: '0',
+  low_stock_threshold: '0', // every piece is stock 1 by nature; 0 switches the warning off
   policies:
-    'Every statue is shipped wrapped in foam inside a rigid box, dispatched ' +
-    'within 3 working days. If a piece arrives damaged, send a photo within 14 ' +
-    'days of delivery and it will be replaced or refunded in full. Unused items ' +
-    'can be returned within 14 days; return postage is the buyer\'s.',
+    'Every piece is one of a kind, so an order is first a request: you tell us ' +
+    'where it should go, we confirm within a day that it is still available, ' +
+    'together with the exact shipping cost and how to pay. It is then wrapped in ' +
+    'foam inside a rigid box and sent tracked and insured from Israel. If it ' +
+    'arrives damaged, send a photo within 14 days and you get a full refund. ' +
+    'We ship to Europe, the United States, the United Arab Emirates and Israel.',
 };
 
 // Statements are prepared where they run, not hoisted: the remote driver
@@ -127,32 +147,40 @@ const setSettings = db.transaction((obj) => {
 /* Products                                                            */
 /* ------------------------------------------------------------------ */
 
+/** Adds the parsed `gallery` array (extra photos) to a product row. */
+function withGallery(row) {
+  if (!row) return row;
+  return { ...row, gallery: safeParse(row.gallery_json, []) };
+}
+
 const products = {
   all() {
     return db
       .prepare('SELECT * FROM products ORDER BY sort_order ASC, id ASC')
-      .all();
+      .all()
+      .map(withGallery);
   },
   listed() {
     return db
       .prepare('SELECT * FROM products WHERE active = 1 ORDER BY sort_order ASC, id ASC')
-      .all();
+      .all()
+      .map(withGallery);
   },
   bySlug(slug) {
-    return db.prepare('SELECT * FROM products WHERE slug = ?').get(String(slug));
+    return withGallery(db.prepare('SELECT * FROM products WHERE slug = ?').get(String(slug)));
   },
   byId(id) {
     const n = intId(id);
     if (n === null) return undefined;
-    return db.prepare('SELECT * FROM products WHERE id = ?').get(n);
+    return withGallery(db.prepare('SELECT * FROM products WHERE id = ?').get(n));
   },
   create(p) {
     return db
       .prepare(
         `INSERT INTO products
          (slug, name, subtitle, description, price_cents, stock, image,
-          materials, dimensions, weight_grams, active, sort_order)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+          materials, dimensions, weight_grams, active, sort_order, gallery_json)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(...productValues(p));
   },
@@ -164,7 +192,7 @@ const products = {
         `UPDATE products SET
            slug = ?, name = ?, subtitle = ?, description = ?, price_cents = ?,
            stock = ?, image = ?, materials = ?, dimensions = ?, weight_grams = ?,
-           active = ?, sort_order = ?
+           active = ?, sort_order = ?, gallery_json = ?
          WHERE id = ?`
       )
       .run(...productValues(p), n);
@@ -203,6 +231,7 @@ function productValues(p) {
     Number(p.weight_grams) || 0,
     p.active ? 1 : 0,
     Number(p.sort_order) || 0,
+    JSON.stringify(Array.isArray(p.gallery) ? p.gallery : safeParse(p.gallery_json, [])),
   ];
 }
 
@@ -291,6 +320,31 @@ const orders = {
       : db.prepare('SELECT * FROM orders ORDER BY id DESC LIMIT ?').all(limit);
     return rows.map(hydrate);
   },
+  /**
+   * The buyer filled in the order form: store who they are and where the
+   * piece should go, and mark the order as a request awaiting payment.
+   * Stock is NOT touched here — that happens when the order is marked paid.
+   */
+  saveRequest(id, d) {
+    const n = intId(id);
+    if (n === null) return;
+    db.prepare(
+      `UPDATE orders SET status = 'requested', provider = 'request',
+         email = ?, customer_name = ?, phone = ?, address_json = ?,
+         shipping_cents = ?, total_cents = ?, shipping_label = ?, notes = ?
+       WHERE id = ?`
+    ).run(
+      String(d.email || ''),
+      String(d.customer_name || ''),
+      String(d.phone || ''),
+      JSON.stringify(d.address || {}),
+      Number(d.shipping_cents) || 0,
+      Number(d.total_cents) || 0,
+      String(d.shipping_label || ''),
+      String(d.notes || ''),
+      n
+    );
+  },
   setStatus(id, status, extra = {}) {
     const n = intId(id);
     if (n === null) return;
@@ -352,13 +406,15 @@ const orders = {
       .get();
     const toShip = db
       .prepare("SELECT COUNT(*) n FROM orders WHERE status = 'paid'").get().n;
+    const requested = db
+      .prepare("SELECT COUNT(*) n FROM orders WHERE status = 'requested'").get().n;
     const last30 = db
       .prepare(
         `SELECT COALESCE(SUM(total_cents),0) cents FROM orders
          WHERE status IN ('paid','shipped') AND created_at >= datetime('now','-30 days')`
       )
       .get().cents;
-    return { count: paid.n, revenue_cents: paid.cents, toShip, last30_cents: last30 };
+    return { count: paid.n, revenue_cents: paid.cents, toShip, requested, last30_cents: last30 };
   },
 };
 
@@ -387,73 +443,118 @@ function safeParse(s, fallback) {
 }
 
 /* ------------------------------------------------------------------ */
-/* First-run seed: the three pieces from the photo.                    */
+/* The catalogue.                                                      */
+/*                                                                     */
+/* src/catalog.json describes every piece (written by hand, photos     */
+/* processed by tools/process_photos.py). On start-up any piece in the */
+/* file that is not yet in the database is added, so a fresh database  */
+/* gets the whole collection and an existing one only gains new items. */
+/* Edits made in the admin panel are never overwritten.                */
 /* ------------------------------------------------------------------ */
 
-function seed() {
-  const count = db.prepare('SELECT COUNT(*) n FROM products').get().n;
-  if (count > 0) return;
+const CATALOG = require('./catalog.json');
 
-  const seeds = [
-    {
-      slug: 'ladybird-in-red',
-      name: 'Ladybird in Red',
-      subtitle: 'Hand-painted steel, six bolt legs',
-      description:
-        'A plump ladybird with a domed, hand-beaten shell finished in deep ' +
-        'lacquer red and six black spots. The body is split down the middle ' +
-        'like real elytra, the head is a polished ball of blackened steel, and ' +
-        'the six legs are bent rod, each one set by eye so the piece stands ' +
-        'square on a shelf or windowsill.',
-      price_cents: 6800,
-      stock: 4,
-      image: '/uploads/ladybug.jpg',
-      materials: 'Welded mild steel, bolts, enamel paint, matte lacquer',
-      dimensions: 'Approx. 14 x 12 x 5 cm',
-      weight_grams: 380,
-      sort_order: 1,
-    },
-    {
-      slug: 'wrench-legged-beetle',
-      name: 'The Wrench-Legged Beetle',
-      subtitle: 'Two open-end spanners for hind legs',
-      description:
-        'The largest of the flock. A smooth bronze-toned carapace scored with a ' +
-        'single seam sits on a blackened thorax, and the two rear legs are ' +
-        'genuine open-end spanners, kept exactly as they were found. Front and ' +
-        'middle legs are forged rod. It has the weight of a real tool in the hand.',
-      price_cents: 9500,
-      stock: 2,
-      image: '/uploads/beetle.jpg',
-      materials: 'Salvaged spanners, mild steel, bronze patina',
-      dimensions: 'Approx. 22 x 15 x 6 cm',
-      weight_grams: 720,
-      sort_order: 2,
-    },
-    {
-      slug: 'shower-head-spider',
-      name: 'Shower-Head Spider',
-      subtitle: 'A retired tap fitting, reborn with eight legs',
-      description:
-        'The head is a perforated brass shower rose, still carrying its water ' +
-        'marks; the abdomen is a stacked valve body with two red glass eyes set ' +
-        'at the tip. Eight coiled-spring legs are welded in pairs and bent into ' +
-        'a low, ready crouch. Unsettling on a bookshelf, in the best way.',
-      price_cents: 8400,
-      stock: 3,
-      image: '/uploads/spider.jpg',
-      materials: 'Brass shower rose, valve body, springs, glass beads',
-      dimensions: 'Approx. 18 x 18 x 7 cm',
-      weight_grams: 540,
-      sort_order: 3,
-    },
-  ];
+/** The three insects from the very first photo — they keep their pictures. */
+const FOUNDING_PIECES = [
+  {
+    slug: 'ladybird-in-red',
+    name: 'Ladybird in Red',
+    subtitle: 'Hand-painted steel, six bolt legs',
+    description:
+      'A plump ladybird with a domed, hand-beaten shell in deep lacquer red ' +
+      'and six black spots. The shell is split down the middle like real wing ' +
+      'cases, the head is a ball of blackened steel, and the six legs are bent ' +
+      'rod, each one set by eye so it stands square on a shelf.',
+    price: 390,
+    image: '/uploads/ladybug.jpg',
+    materials: 'Mild steel, bolts, enamel paint, matte lacquer',
+    gallery: ['/uploads/bug-collection.jpg'],
+  },
+  {
+    slug: 'wrench-legged-beetle',
+    name: 'The Wrench-Legged Beetle',
+    subtitle: 'Two open-end spanners for hind legs',
+    description:
+      'A smooth bronze-toned carapace scored with a single seam sits on a ' +
+      'blackened thorax, and the two rear legs are genuine open-end spanners, ' +
+      'kept exactly as they were found. It has the weight of a real tool in the hand.',
+    price: 440,
+    image: '/uploads/beetle.jpg',
+    materials: 'Salvaged spanners, mild steel, bronze patina',
+    gallery: ['/uploads/bug-collection.jpg'],
+  },
+  {
+    slug: 'shower-head-spider',
+    name: 'Shower-Head Spider',
+    subtitle: 'A retired tap fitting, reborn with eight legs',
+    description:
+      'The head is a perforated brass shower rose, still carrying its water ' +
+      'marks; the abdomen is a stacked valve body with two red glass eyes at ' +
+      'the tip. Eight coiled-spring legs are welded in pairs and bent into a ' +
+      'low, ready crouch. Unsettling on a bookshelf, in the best way.',
+    price: 390,
+    image: '/uploads/spider.jpg',
+    materials: 'Brass shower rose, valve body, springs, glass beads',
+    gallery: ['/uploads/bug-collection.jpg'],
+  },
+];
+
+/** Every piece the catalogue knows about, in display order. */
+function catalogProducts() {
+  const galleries = {};
+  for (const photo of CATALOG.photos) {
+    if (photo.gallery_for) {
+      (galleries[photo.gallery_for] ||= []).push('/uploads/' + photo.image);
+    }
+  }
+  const out = [];
+  let order = 1;
+  for (const photo of CATALOG.photos) {
+    if (!photo.product) continue;
+    const p = photo.product;
+    out.push({
+      slug: p.slug,
+      name: p.name,
+      subtitle: p.subtitle || '',
+      description: p.description || '',
+      price_cents: Math.round(Number(p.price) * 100),
+      stock: 1, // every piece exists exactly once
+      image: '/uploads/' + photo.image,
+      materials: p.materials || '',
+      dimensions: p.dimensions || '',
+      weight_grams: 0,
+      active: 1,
+      sort_order: order++,
+      gallery: galleries[p.slug] || [],
+    });
+  }
+  for (const f of FOUNDING_PIECES) {
+    out.push({
+      ...f,
+      price_cents: Math.round(f.price * 100),
+      stock: 1,
+      dimensions: '',
+      weight_grams: 0,
+      active: 1,
+      sort_order: order++,
+    });
+  }
+  return out;
+}
+
+/** Adds catalogue pieces that are missing from the database. */
+function seed() {
+  const wanted = catalogProducts();
+  const have = new Set(db.prepare('SELECT slug FROM products').all().map((r) => r.slug));
+  const missing = wanted.filter((p) => !have.has(p.slug));
+  if (missing.length === 0) return 0;
 
   const insert = db.transaction((rows) => {
-    for (const r of rows) products.create({ ...r, active: 1 });
+    for (const r of rows) products.create(r);
   });
-  insert(seeds);
-  console.log('[db] Seeded the catalog with 3 starter products.');
+  insert(missing);
+  console.log(`[db] Added ${missing.length} piece(s) from the catalogue (${wanted.length} total).`);
+  return missing.length;
 }
 
 module.exports = {
@@ -468,4 +569,5 @@ module.exports = {
   orders,
   newRef,
   seed,
+  catalogProducts,
 };

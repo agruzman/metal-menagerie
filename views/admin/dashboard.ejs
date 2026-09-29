@@ -3,7 +3,8 @@
 <h1 style="font-size:1.6rem">Today at <%= settings.store_name %></h1>
 
 <div class="kpis">
-  <div class="kpi"><div class="n"><%= stats.toShip %></div><div class="k">Waiting to ship</div></div>
+  <div class="kpi"><div class="n"><%= stats.requested %></div><div class="k">New requests — reply &amp; arrange payment</div></div>
+  <div class="kpi"><div class="n"><%= stats.toShip %></div><div class="k">Paid, waiting to ship</div></div>
   <div class="kpi"><div class="n"><%= money(stats.last30_cents) %></div><div class="k">Sales, last 30 days</div></div>
   <div class="kpi"><div class="n"><%= stats.count %></div><div class="k">Orders all time</div></div>
   <div class="kpi"><div class="n"><%= money(stats.revenue_cents) %></div><div class="k">Revenue all time</div></div>

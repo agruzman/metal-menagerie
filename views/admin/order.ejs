@@ -38,12 +38,14 @@
           <div class="field">
             <label>Status</label>
             <select name="status">
-              <% ['pending','paid','shipped','cancelled','refunded'].forEach(function (s) { %>
+              <% ['requested','pending','paid','shipped','cancelled','refunded'].forEach(function (s) { %>
                 <option value="<%= s %>" <%= order.status === s ? 'selected' : '' %>><%= s %></option>
               <% }) %>
             </select>
-            <div class="hint">Marking as <em>shipped</em> emails the buyer their tracking number.
-              Cancelling or refunding puts the items back into stock.</div>
+            <div class="hint"><em>requested</em> = the buyer sent the form, you have not been paid yet.
+              Set <em>paid</em> once the money has arrived — that takes the piece off the shelf.
+              <em>shipped</em> emails the buyer their tracking number. Cancelling or refunding
+              puts the piece back on sale.</div>
           </div>
           <div class="field">
             <label>Tracking number</label>

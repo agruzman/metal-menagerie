@@ -1,0 +1,86 @@
+<%- include('partials/head', { title: 'Your order' }) %>
+
+<div class="wrap section" style="max-width:980px">
+  <div class="eyebrow">Almost there</div>
+  <h1>Where should it go?</h1>
+  <p class="muted" style="max-width:60ch;margin-top:-4px">
+    Every piece exists exactly once, so an order is first a request. Tell us who you are and
+    where the piece should travel; we confirm within a day that it is still on the shelf,
+    with the exact shipping cost and how to pay. Nothing is charged now.
+  </p>
+
+  <% if (error) { %><div class="notice bad" style="margin-top:22px"><%= error %></div><% } %>
+
+  <div class="order-grid" style="display:grid;grid-template-columns:1.25fr .85fr;gap:40px;margin-top:30px;align-items:start">
+    <form method="post" action="/order/details/<%= order.ref %>" class="order-form">
+      <h2 style="font-size:1.1rem">You</h2>
+      <div class="two">
+        <div class="field"><label>Full name</label><input type="text" name="name" required value="<%= values.name || '' %>" autocomplete="name"></div>
+        <div class="field"><label>Email</label><input type="email" name="email" required value="<%= values.email || '' %>" autocomplete="email"></div>
+      </div>
+      <div class="field">
+        <label>Phone (with country code)</label>
+        <input type="text" name="phone" required value="<%= values.phone || '' %>" placeholder="+972 50 000 0000" autocomplete="tel">
+        <div class="hint">For the courier, and so we can reach you quickly about the piece.</div>
+      </div>
+
+      <h2 style="font-size:1.1rem;margin-top:26px">Shipping address</h2>
+      <div class="field">
+        <label>Country</label>
+        <select name="country" required id="country">
+          <% countries.forEach(function (c) { %>
+            <option value="<%= c.code %>" <%= (values.country || settings.country) === c.code ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+        <div class="hint">We ship to Europe, the United States, the United Arab Emirates and Israel.</div>
+      </div>
+      <div class="field"><label>Street address</label><input type="text" name="line1" required value="<%= values.line1 || '' %>" autocomplete="address-line1"></div>
+      <div class="field"><label>Apartment, floor, company (optional)</label><input type="text" name="line2" value="<%= values.line2 || '' %>" autocomplete="address-line2"></div>
+      <div class="three">
+        <div class="field"><label>City</label><input type="text" name="city" required value="<%= values.city || '' %>" autocomplete="address-level2"></div>
+        <div class="field"><label>Region / state</label><input type="text" name="state" value="<%= values.state || '' %>" autocomplete="address-level1"></div>
+        <div class="field"><label>Postal code</label><input type="text" name="postal_code" value="<%= values.postal_code || '' %>" autocomplete="postal-code"></div>
+      </div>
+
+      <div class="field">
+        <label>Anything we should know? (optional)</label>
+        <textarea name="notes" style="min-height:90px" placeholder="A gift? A deadline? A question about the piece?"><%= values.notes || '' %></textarea>
+      </div>
+
+      <button class="btn" type="submit" style="width:100%;margin-top:6px">Send order request</button>
+      <p class="small muted center" style="margin-top:10px">
+        You will get a confirmation by email right away, and a personal reply within a day.
+      </p>
+    </form>
+
+    <aside class="panel" style="background:var(--ink-2);border:1px solid var(--rule);padding:22px;border-radius:var(--radius)">
+      <h2 style="font-size:1.05rem">Your pieces</h2>
+      <table class="lines">
+        <tbody>
+          <% order.items.forEach(function (i) { %>
+            <tr>
+              <td class="thumb"><img src="<%= thumb(i.image) %>" alt=""></td>
+              <td><%= i.name %><div class="small muted">one of a kind</div></td>
+              <td class="right"><%= money(i.price_cents * i.qty) %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <div class="totals" style="max-width:none;margin-top:14px">
+        <div class="row"><span>Pieces</span><span><%= money(order.subtotal_cents) %></span></div>
+        <div class="row small muted"><span>Shipping (estimate)</span><span><%= estimate.cents === 0 ? 'Free' : money(estimate.cents) %></span></div>
+        <div class="row grand"><span>Estimated total</span><span><%= money(order.subtotal_cents + estimate.cents) %></span></div>
+      </div>
+      <p class="small muted" style="margin-top:12px">
+        <% options.forEach(function (o) { %>
+          <%= o.label %>: <%= o.cents === 0 ? 'free' : money(o.cents) %>.<br>
+        <% }) %>
+        The exact cost is confirmed in our reply before you pay anything.
+      </p>
+    </aside>
+  </div>
+</div>
+
+<style>@media (max-width: 860px) { .order-grid { grid-template-columns: 1fr !important; } }</style>
+
+<%- include('partials/foot') %>

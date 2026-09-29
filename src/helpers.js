@@ -4,7 +4,32 @@
  * All money is stored and calculated in *cents* (whole numbers). Never use
  * decimals for money: 0.1 + 0.2 !== 0.3 in JavaScript and pennies go missing.
  */
+const fs = require('fs');
+const path = require('path');
 const { getSettings, products } = require('./db');
+const { countryName, isDomestic } = require('./countries');
+
+/* ------------------------------- images ------------------------------- */
+
+const UPLOADS_ON_DISK = path.join(__dirname, '..', 'public', 'uploads');
+const smallCache = new Map();
+
+/**
+ * Grid and cart thumbnails use the 600px "-sm" copy of a photo when one
+ * exists next to it (tools/process_photos.py makes them), otherwise the
+ * full image. Checked once per path, then remembered.
+ */
+function thumb(imagePath) {
+  if (!imagePath || !imagePath.startsWith('/uploads/') || !imagePath.endsWith('.jpg')) {
+    return imagePath || '/uploads/group.jpg';
+  }
+  if (!smallCache.has(imagePath)) {
+    const small = imagePath.replace(/\.jpg$/, '-sm.jpg');
+    const onDisk = path.join(UPLOADS_ON_DISK, path.basename(small));
+    smallCache.set(imagePath, fs.existsSync(onDisk) ? small : imagePath);
+  }
+  return smallCache.get(imagePath);
+}
 
 function money(cents, settings = getSettings()) {
   const n = (Number(cents || 0) / 100).toFixed(2);
@@ -99,18 +124,24 @@ function shippingOptions(subtotal_cents, settings = getSettings()) {
     {
       id: 'domestic',
       label: qualifiesFree
-        ? `Free shipping within ${settings.country}`
-        : `${settings.ship_domestic_label} — within ${settings.country}`,
+        ? `Free shipping within ${countryName(settings.country)}`
+        : settings.ship_domestic_label,
       cents: qualifiesFree ? 0 : domestic,
-      days: [3, 7],
+      days: [2, 5],
     },
     {
       id: 'international',
-      label: `${settings.ship_intl_label} — rest of world`,
+      label: settings.ship_intl_label,
       cents: intl,
-      days: [7, 21],
+      days: [7, 14],
     },
   ];
+}
+
+/** The shipping option that applies to a destination country. */
+function shippingFor(countryCode, subtotal_cents, settings = getSettings()) {
+  const id = isDomestic(countryCode, settings.country) ? 'domestic' : 'international';
+  return shippingOptionById(id, subtotal_cents, settings);
 }
 
 function shippingOptionById(id, subtotal_cents, settings = getSettings()) {
@@ -134,6 +165,7 @@ function cartToItems(lines) {
 
 module.exports = {
   money,
+  thumb,
   toCents,
   slugify,
   readCart,
@@ -142,5 +174,6 @@ module.exports = {
   clearCart,
   shippingOptions,
   shippingOptionById,
+  shippingFor,
   cartToItems,
 };

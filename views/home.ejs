@@ -3,31 +3,49 @@
 <div class="wrap">
   <section class="hero">
     <div>
-      <div class="eyebrow">Handmade · one of a kind</div>
+      <div class="eyebrow">Handmade in Israel · each piece made once</div>
       <h1><%= settings.tagline %></h1>
       <p><%= settings.intro %></p>
-      <p style="margin-top:26px">
-        <a class="btn" href="/shop">See what's in the workshop</a>
+      <p style="margin-top:26px;display:flex;gap:12px;flex-wrap:wrap">
+        <a class="btn" href="/shop">See all <%= products.length %> pieces</a>
+        <a class="btn ghost" href="/genka">Meet Genka</a>
       </p>
     </div>
     <div class="hero-art">
-      <img src="/uploads/group.jpg" alt="Three handmade metal insects on a workbench">
+      <a href="/product/crowned-eagle"><img src="/uploads/crowned-eagle.jpg" alt="The Crowned Eagle — table knives, spoons and a small gold crown"></a>
     </div>
   </section>
 
   <section class="section">
-    <h2>In stock now</h2>
+    <h2>From the workshop</h2>
     <p class="muted" style="margin-bottom:34px">
-      Each piece is listed individually. When the counter hits zero, that one has found a home.
+      Spoons become owls, chain becomes a lion's mane, a bicycle chain becomes a crocodile.
+      <% if (products.length) { %>
+        Prices from <%= money(Math.min.apply(null, products.map(function (p) { return p.price_cents; }))) %>
+        to <%= money(Math.max.apply(null, products.map(function (p) { return p.price_cents; }))) %>.
+      <% } %>
     </p>
     <div class="grid">
-      <% products.forEach(function (p) { %>
+      <% featured.forEach(function (p) { %>
         <%- include('partials/card', { p: p }) %>
       <% }) %>
     </div>
+    <p class="center" style="margin-top:36px"><a class="btn ghost" href="/shop">The whole collection →</a></p>
     <% if (products.length === 0) { %>
       <div class="empty">The shelves are empty just now. Check back soon.</div>
     <% } %>
+  </section>
+
+  <section class="section meet">
+    <div class="meet-photo"><img src="/uploads/genka-sm.jpg" alt="Genka"></div>
+    <div>
+      <div class="eyebrow">The maker</div>
+      <h2>A welder who started noticing that bolts have faces</h2>
+      <p class="muted">Genka is a <em>сварщик</em> — a welder — at a steel factory in Israel.
+        The talent arrived late and by accident, one slow half-hour at the end of a shift.
+        Every free hour since has gone into the corner of the shop where these were made.</p>
+      <p><a href="/genka">Read his story →</a></p>
+    </div>
   </section>
 </div>
 
