@@ -13,22 +13,45 @@ const { countryName, isDomestic } = require('./countries');
 
 const UPLOADS_ON_DISK = path.join(__dirname, '..', 'public', 'uploads');
 const smallCache = new Map();
+const versionCache = new Map();
+
+/**
+ * Photos are served with a week-long cache. When a photo is replaced under
+ * the same name, browsers would keep showing the old one — so every image
+ * URL carries a short stamp derived from the file's size and modification
+ * time, which changes whenever the file does. Photos that live in the
+ * database (admin uploads) have unique names already and need no stamp.
+ */
+function asset(imagePath) {
+  if (!imagePath || !imagePath.startsWith('/uploads/')) return imagePath || '/uploads/group.jpg';
+  if (!versionCache.has(imagePath)) {
+    let stamp = '';
+    try {
+      const st = fs.statSync(path.join(UPLOADS_ON_DISK, path.basename(imagePath)));
+      stamp = (st.size ^ Math.floor(st.mtimeMs / 1000)).toString(36);
+    } catch {
+      /* not a file on disk (served from the database) */
+    }
+    versionCache.set(imagePath, stamp ? `${imagePath}?v=${stamp}` : imagePath);
+  }
+  return versionCache.get(imagePath);
+}
 
 /**
  * Grid and cart thumbnails use the 600px "-sm" copy of a photo when one
  * exists next to it (tools/process_photos.py makes them), otherwise the
- * full image. Checked once per path, then remembered.
+ * full image. Checked once per path, then remembered. Stamped like asset().
  */
 function thumb(imagePath) {
   if (!imagePath || !imagePath.startsWith('/uploads/') || !imagePath.endsWith('.jpg')) {
-    return imagePath || '/uploads/group.jpg';
+    return asset(imagePath || '/uploads/group.jpg');
   }
   if (!smallCache.has(imagePath)) {
     const small = imagePath.replace(/\.jpg$/, '-sm.jpg');
     const onDisk = path.join(UPLOADS_ON_DISK, path.basename(small));
     smallCache.set(imagePath, fs.existsSync(onDisk) ? small : imagePath);
   }
-  return smallCache.get(imagePath);
+  return asset(smallCache.get(imagePath));
 }
 
 function money(cents, settings = getSettings()) {
@@ -165,6 +188,7 @@ function cartToItems(lines) {
 
 module.exports = {
   money,
+  asset,
   thumb,
   toCents,
   slugify,

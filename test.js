@@ -49,8 +49,12 @@ t('second angles are attached as gallery photos', () => {
   assert.deepStrictEqual(products.bySlug('floor-scrubber').gallery, ['/uploads/floor-scrubber-2.jpg']);
 });
 t('seeding again adds nothing', () => assert.strictEqual(seed(), 0));
-t('thumbnails resolve to the -sm copy', () =>
-  assert.strictEqual(H.thumb('/uploads/lion-king.jpg'), '/uploads/lion-king-sm.jpg'));
+t('thumbnails resolve to the -sm copy, with a cache-busting stamp', () =>
+  assert.match(H.thumb('/uploads/lion-king.jpg'), /^\/uploads\/lion-king-sm\.jpg\?v=[a-z0-9]+$/));
+t('full images get a stamp that changes with the file', () => {
+  assert.match(H.asset('/uploads/genka-welding.jpg'), /^\/uploads\/genka-welding\.jpg\?v=[a-z0-9]+$/);
+  assert.strictEqual(H.asset('/uploads/1700000000-abc123.jpg'), '/uploads/1700000000-abc123.jpg'); // database photo: no file, no stamp
+});
 t('the two hero pieces cost the most', () => {
   assert.strictEqual(products.bySlug('crowned-eagle').price_cents, 79000);
   assert.strictEqual(products.bySlug('lion-king').price_cents, 79000);

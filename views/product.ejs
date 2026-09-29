@@ -4,13 +4,13 @@
   <section class="product">
     <div>
       <div class="shot">
-        <img id="mainShot" src="<%= product.image || '/uploads/group.jpg' %>" alt="<%= product.name %>">
+        <img id="mainShot" src="<%= asset(product.image || '/uploads/group.jpg') %>" alt="<%= product.name %>">
       </div>
       <% if (product.gallery && product.gallery.length) { %>
         <div class="gallery">
-          <button type="button" class="on" data-src="<%= product.image %>"><img src="<%= thumb(product.image) %>" alt=""></button>
+          <button type="button" class="on" data-src="<%= asset(product.image) %>"><img src="<%= thumb(product.image) %>" alt=""></button>
           <% product.gallery.forEach(function (g) { %>
-            <button type="button" data-src="<%= g %>"><img src="<%= thumb(g) %>" alt="Another view of <%= product.name %>"></button>
+            <button type="button" data-src="<%= asset(g) %>"><img src="<%= thumb(g) %>" alt="Another view of <%= product.name %>"></button>
           <% }) %>
         </div>
       <% } %>

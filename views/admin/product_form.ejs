@@ -57,7 +57,7 @@
   <div class="panel">
     <h2>Photo</h2>
     <% if (product && product.image) { %>
-      <img src="<%= product.image %>" alt="" style="width:180px;border:1px solid var(--rule);margin-bottom:16px">
+      <img src="<%= asset(product.image) %>" alt="" style="width:180px;border:1px solid var(--rule);margin-bottom:16px">
       <input type="hidden" name="existing_image" value="<%= product.image %>">
     <% } %>
     <div class="field">

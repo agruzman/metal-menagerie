@@ -26,7 +26,7 @@ const cookieSession = require('cookie-session');
 
 const { seed, getSettings, products, images } = require('./src/db');
 const { UPLOAD_DIR } = require('./src/paths');
-const { readCart, thumb } = require('./src/helpers');
+const { readCart, thumb, asset } = require('./src/helpers');
 const { countryName } = require('./src/countries');
 const checkout = require('./src/routes/checkout');
 
@@ -93,6 +93,7 @@ app.use((req, res, next) => {
   res.locals.settings = settings;
   res.locals.money = (c) => require('./src/helpers').money(c, settings);
   res.locals.thumb = thumb;
+  res.locals.asset = asset;
   res.locals.countryName = countryName;
   res.locals.baseUrl = BASE_URL;
   res.locals.cartCount = readCart(req).count;
@@ -126,6 +127,7 @@ app.use((err, req, res, next) => {
       settings: s,
       money: (c) => require('./src/helpers').money(c, s),
       thumb,
+      asset,
       countryName,
       baseUrl: BASE_URL,
       cartCount: 0,
