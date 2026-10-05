@@ -202,5 +202,190 @@ t('stock never goes negative', () => {
 });
 t('refunded order left the revenue figure', () => assert.strictEqual(orders.stats().count, 0));
 
+console.log('\nWHERE VISITORS ARE (IP → COUNTRY)');
+const G = require('./src/geoip');
+G._load(
+  [
+    'start_ip,end_ip,country', // a header line must be ignored
+    '8.8.8.0,8.8.8.255,US',
+    '1.0.0.0,1.0.0.255,AU', // out of order on purpose
+    '1.0.1.0,1.0.3.255,CN',
+    '5.29.0.0,5.29.255.255,IL',
+    '10.0.0.0,10.255.255.255,ZZ', // "no country" rows are dropped
+    '2a01:4f8::,2a01:4f8:ffff:ffff:ffff:ffff:ffff:ffff,DE',
+    '2001:4860::,2001:4860:ffff:ffff:ffff:ffff:ffff:ffff,US',
+    '',
+  ].join('\n')
+);
+t('IPv4 address → country', () => assert.strictEqual(G.lookup('8.8.8.8'), 'US'));
+t('unsorted input is sorted first', () => assert.strictEqual(G.lookup('1.0.0.9'), 'AU'));
+t('range ends are inclusive', () => {
+  assert.strictEqual(G.lookup('1.0.3.255'), 'CN');
+  assert.strictEqual(G.lookup('1.0.4.0'), '');
+});
+t('IPv4-mapped address (how Node reports IPv4 clients) → country', () =>
+  assert.strictEqual(G.lookup('::ffff:5.29.100.1'), 'IL'));
+t('IPv6 address → country', () => {
+  assert.strictEqual(G.lookup('2a01:4f8:1:2::3'), 'DE');
+  assert.strictEqual(G.lookup('2001:4860:4860::8888'), 'US');
+  assert.strictEqual(G.lookup('2a02::1'), '');
+});
+t('private, loopback and garbage → unknown', () => {
+  for (const ip of ['10.1.2.3', '127.0.0.1', '::1', 'not-an-ip', '999.1.1.1', '', undefined]) {
+    assert.strictEqual(G.lookup(ip), '', String(ip));
+  }
+});
+t('IP parsing handles the awkward forms', () => {
+  assert.deepStrictEqual(G.parseIp('[2a01:4f8::1]'), { v: 6, hi: 0x2a0104f800000000n, lo: 1n });
+  assert.deepStrictEqual(G.parseIp('fe80::1%eth0'), { v: 6, hi: 0xfe80000000000000n, lo: 1n });
+  assert.deepStrictEqual(G.parseIp('16843009'), { v: 4, n: 0x01010101 });
+  assert.strictEqual(G.parseIp('1::2::3'), null);
+  assert.strictEqual(G.parseIp('1:2:3:4:5:6:7'), null);
+});
+t('the proxy header wins when present, nonsense in it is ignored', () => {
+  assert.strictEqual(G.countryOf({ headers: { 'cf-ipcountry': 'fr' }, ip: '8.8.8.8' }), 'FR');
+  assert.strictEqual(G.countryOf({ headers: { 'cf-ipcountry': 'XX' }, ip: '8.8.8.8' }), 'US');
+  assert.strictEqual(G.countryOf({ headers: {}, ip: '::ffff:8.8.8.8' }), 'US');
+});
+t("the visitor's real address comes from Cloudflare's header first", () => {
+  assert.strictEqual(G.clientIp({ headers: { 'cf-connecting-ip': '8.8.8.8', 'x-forwarded-for': '1.1.1.1' }, ip: '127.0.0.1' }), '8.8.8.8');
+  assert.strictEqual(G.clientIp({ headers: { 'true-client-ip': '8.8.4.4' }, ip: '127.0.0.1' }), '8.8.4.4');
+  assert.strictEqual(G.clientIp({ headers: {}, ip: '5.29.0.1' }), '5.29.0.1');
+});
+t('monthly list URLs are well formed, newest first', () => {
+  const urls = G.monthUrls();
+  assert.strictEqual(urls.length, 2);
+  assert.match(urls[0], /^https:\/\/download\.db-ip\.com\/free\/dbip-country-lite-\d{4}-\d{2}\.csv\.gz$/);
+  assert.notStrictEqual(urls[0], urls[1]);
+});
+t('status says the list is loaded', () => {
+  const s = G.status();
+  assert.strictEqual(s.ready, true);
+  assert.strictEqual(s.rows, 6);
+  assert.strictEqual(G.waiting(), false);
+});
+
+console.log('\nCOUNTING VISITORS');
+const V = require('./src/visits');
+const CHROME = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36';
+const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+const browse = (over = {}, headers = {}) => ({
+  method: 'GET',
+  path: '/',
+  ip: '8.8.8.8',
+  ...over,
+  headers: {
+    'user-agent': CHROME,
+    accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+    'sec-fetch-mode': 'navigate',
+    'sec-fetch-dest': 'document',
+    ...headers,
+  },
+});
+t('a browser opening a page counts', () => {
+  assert.ok(V.shouldCount(browse()));
+  assert.ok(V.shouldCount(browse({ path: '/product/lion-king' })));
+  assert.ok(V.shouldCount(browse({}, { 'user-agent': IPHONE })));
+  assert.ok(V.shouldCount(browse({}, { 'user-agent': CHROME, accept: 'text/html' })), 'minimal headers');
+});
+t('the admin panel, photos, files and the keep-alive do not count', () => {
+  for (const p of ['/admin', '/admin/orders/3', '/uploads/lion-king.jpg', '/css/style.css', '/healthz', '/favicon.ico', '/robots.txt', '/webhooks/stripe']) {
+    assert.ok(!V.shouldCount(browse({ path: p })), p);
+  }
+});
+t('bots, tools and link previews do not count', () => {
+  for (const ua of [
+    'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
+    'curl/8.4.0',
+    'python-requests/2.31',
+    'Go-http-client/1.1',
+    'facebookexternalhit/1.1',
+    'WhatsApp/2.23.20.0',
+    'Mozilla/5.0 (compatible; bingbot/2.0)',
+    'node',
+    '',
+  ]) {
+    assert.ok(!V.shouldCount(browse({}, { 'user-agent': ua })), ua || '(empty)');
+  }
+});
+t('POSTs, non-HTML requests, prefetches and embedded frames do not count', () => {
+  assert.ok(!V.shouldCount(browse({ method: 'POST' })));
+  assert.ok(!V.shouldCount(browse({}, { accept: '*/*' })));
+  assert.ok(!V.shouldCount(browse({}, { accept: 'application/json' })));
+  assert.ok(!V.shouldCount(browse({}, { 'sec-purpose': 'prefetch' })));
+  assert.ok(!V.shouldCount(browse({}, { 'sec-fetch-dest': 'iframe' })));
+  assert.ok(!V.shouldCount(browse({}, { 'sec-fetch-mode': 'cors' })));
+});
+t('the same browser on the same address is the same visitor; others are not', () => {
+  assert.strictEqual(V.visitorKey(browse()), V.visitorKey(browse({ path: '/shop' })));
+  assert.notStrictEqual(V.visitorKey(browse()), V.visitorKey(browse({ ip: '5.29.0.1' })));
+  assert.notStrictEqual(V.visitorKey(browse()), V.visitorKey(browse({}, { 'user-agent': IPHONE })));
+  assert.match(V.visitorKey(browse()), /^[0-9a-f]{24}$/);
+});
+
+V.record(browse());                                    // US, home
+V.record(browse({ path: '/shop' }));                   // same person, second page
+V.record(browse({ path: '/product/lion-king/' }));     // same person, trailing slash
+V.record(browse({ ip: '5.29.0.1' }, { 'user-agent': IPHONE }));                // IL
+V.record(browse({ ip: '::ffff:1.0.2.2', path: '/product/lion-king' }));          // CN, via IPv4-mapped address
+V.record(browse({ ip: '203.0.113.9' }, { 'cf-ipcountry': 'FR' }));              // country from the proxy header
+V.record(browse({ ip: '192.168.1.5', path: '/order/details/MM-ABC-1234' }));     // unknown country
+t('hits are written in one batch', () => assert.strictEqual(V.flush(true), 7));
+t('a second flush has nothing to do', () => assert.strictEqual(V.flush(true), 0));
+
+const S = V.stats(30);
+t('unique visitors today, and their page views', () => {
+  assert.strictEqual(S.today.visitors, 5);
+  assert.strictEqual(S.today.views, 7);
+  assert.strictEqual(S.all.visitors, 5);
+  assert.strictEqual(S.week.visitors, 5);
+  assert.strictEqual(S.month.visitors, 5);
+});
+t('visitors by country, biggest first, with names and shares', () => {
+  assert.deepStrictEqual(
+    S.countries.map((c) => [c.code, c.visitors, c.views]),
+    [['', 1, 1], ['CN', 1, 1], ['FR', 1, 1], ['IL', 1, 1], ['US', 1, 3]].sort((a, b) => b[2] - a[2] || a[0].localeCompare(b[0]))
+  );
+  const us = S.countries.find((c) => c.code === 'US');
+  assert.strictEqual(us.name, 'United States');
+  assert.strictEqual(us.flag, '🇺🇸');
+  assert.strictEqual(us.share, 20);
+  assert.strictEqual(S.countries.find((c) => c.code === '').name, 'Unknown');
+  assert.strictEqual(V.countryLabel('IL'), 'Israel');
+});
+t('day-by-day series covers the whole window and ends today', () => {
+  assert.strictEqual(S.series.length, 30);
+  const last = S.series[S.series.length - 1];
+  assert.strictEqual(last.label, new Date().toISOString().slice(0, 10));
+  assert.strictEqual(last.visitors, 5);
+  assert.strictEqual(S.series[0].visitors, 0);
+});
+t('most viewed pages, tidied', () => {
+  assert.deepStrictEqual(S.pages.slice(0, 2).map((p) => [p.path, p.views]), [['/', 3], ['/product/lion-king', 2]]);
+  assert.ok(S.pages.some((p) => p.path === '/order/details'), 'order reference stripped from the path');
+  assert.ok(!S.pages.some((p) => p.path.length > 1 && p.path.endsWith('/')), 'no trailing slashes');
+});
+t('all-time view groups by month', () => {
+  const A = V.stats(0);
+  assert.strictEqual(A.range, 0);
+  assert.strictEqual(A.series.length, 1);
+  assert.strictEqual(A.series[0].label, new Date().toISOString().slice(0, 7));
+  assert.strictEqual(A.series[0].visitors, 5);
+  assert.strictEqual(A.since, new Date().toISOString().slice(0, 10));
+});
+t('an unknown range falls back to 30 days', () => assert.strictEqual(V.stats('yesterday').range, 30));
+t('the same visitor again today adds views, not visitors', () => {
+  V.record(browse({ path: '/genka' }));
+  V.flush(true);
+  const s = V.stats(7);
+  assert.strictEqual(s.today.visitors, 5);
+  assert.strictEqual(s.today.views, 8);
+  assert.strictEqual(V.lastWeek().visitors, 5);
+});
+t('no IP address is stored anywhere', () => {
+  const dump = JSON.stringify(db.prepare('SELECT * FROM visits').all()) + JSON.stringify(db.prepare('SELECT * FROM pageviews').all());
+  for (const ip of ['8.8.8.8', '5.29.0.1', '1.0.2.2', '203.0.113.9', '192.168.1.5']) assert.ok(!dump.includes(ip), ip);
+});
+
 fs.rmSync(process.env.SHOP_DATA_DIR, { recursive: true, force: true });
 console.log(`\n${pass} checks passed.`);

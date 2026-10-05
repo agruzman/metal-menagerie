@@ -8,6 +8,7 @@
   <div class="kpi"><div class="n"><%= money(stats.last30_cents) %></div><div class="k">Sales, last 30 days</div></div>
   <div class="kpi"><div class="n"><%= stats.count %></div><div class="k">Orders all time</div></div>
   <div class="kpi"><div class="n"><%= money(stats.revenue_cents) %></div><div class="k">Revenue all time</div></div>
+  <div class="kpi"><div class="n"><%= visitors.visitors %></div><div class="k"><a href="/admin/visitors">Visitors, last 7 days →</a></div></div>
 </div>
 
 <% if (lowStock.length) { %>

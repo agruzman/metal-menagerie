@@ -29,6 +29,8 @@ const { UPLOAD_DIR } = require('./src/paths');
 const { readCart, thumb, asset } = require('./src/helpers');
 const { countryName } = require('./src/countries');
 const checkout = require('./src/routes/checkout');
+const visits = require('./src/visits');
+const geoip = require('./src/geoip');
 
 const app = express();
 
@@ -75,6 +77,11 @@ app.get('/uploads/:name', (req, res, next) => {
   res.send(img.data);
 });
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
+
+/* --- Visitor counting (no cookies; see src/visits.js). Sits after the
+       static files so only real pages reach it; it ignores bots, the admin
+       panel and the keep-alive pings itself. Results: /admin/visitors. --- */
+app.use(visits.middleware);
 
 app.use(
   cookieSession({
@@ -147,9 +154,14 @@ app.listen(PORT, '0.0.0.0', () => {
     `  Orders:   ${live ? 'card checkout via Stripe' : 'order requests by email (add STRIPE_SECRET_KEY for card checkout)'}`
   );
   console.log(
-    `  Email:    ${require('./src/mailer').configured ? 'SMTP configured' : 'NOT configured — requests are only visible in /admin (set SMTP_* to send emails)'}\n`
+    `  Email:    ${require('./src/mailer').configured ? 'SMTP configured' : 'NOT configured — requests are only visible in /admin (set SMTP_* to send emails)'}`
+  );
+  console.log(
+    `  Visitors: counted at ${BASE_URL}/admin/visitors${process.env.GEOIP === '0' ? ' (country lookup off)' : ''}\n`
   );
   keepAwake();
+  geoip.start(); // fetches the IP-to-country list in the background
+  visits.start(); // saves the last few seconds of counts on shutdown
 });
 
 /**

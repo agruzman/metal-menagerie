@@ -55,6 +55,8 @@ src/sqlite.js        opens the database (local file, or Turso when hosted)
 src/paths.js         where the local database lives
 src/mailer.js        order emails
 src/countries.js     where the shop ships (Europe, USA, Emirates, Israel)
+src/visits.js        counts visitors — no cookies, no outside service (section 3)
+src/geoip.js         which country an address is in, from a free monthly list
 src/catalog.json     the 40 pieces: names, blurbs, prices, photos
 src/routes/shop.js     the public pages, the artist page and the cart
 src/routes/checkout.js the order form, Stripe checkout & webhook (for later)
@@ -109,6 +111,30 @@ puts the piece back on sale.
 
 **Settings** — shop name, currency, shipping prices, which countries you post
 to, free-shipping threshold, and the shipping/returns text. No code involved.
+
+**Visitors** — how many different people opened the shop today, this week,
+this month and ever; which countries they are in; which pieces they look at
+most; and a day-by-day table. The counting is done by the shop itself, so
+there is no Google Analytics, no cookie banner and no bill:
+
+- A *visitor* is one browser on one internet address, recognised by a salted
+  one-way hash. The address itself is never written down, so the database
+  holds nothing personal. One person on a phone and a laptop counts twice; a
+  family sharing one connection and one browser counts once. Good enough to
+  see whether a post on Instagram brought fifty people or five.
+- Search-engine crawlers, link previews (WhatsApp, Facebook…), monitoring
+  tools, the keep-alive ping and your own visits to `/admin` are left out.
+- Countries come from the free *IP to Country Lite* list by
+  [DB-IP](https://db-ip.com) (CC BY 4.0 — the credit line on the page is the
+  licence condition). The server downloads the ~8 MB list when it starts and
+  again each month; until the first download finishes — a minute or so —
+  new visitors are filed under *Unknown*. `GEOIP=0` in the environment
+  switches country lookup off altogether. Days are counted in UTC.
+- Counting started the day this version went live. There is no way to
+  recover earlier traffic: Render's free plan keeps no request logs.
+
+The numbers live in the same database as the orders, so on the free stack
+they need Turso to survive a deploy, exactly like everything else.
 
 ### How an order works right now (no card payments yet)
 
@@ -370,6 +396,15 @@ workflow".** Run `gh auth refresh -s workflow` and re-run the script.
 
 **A photo will not upload.** JPG, PNG, WEBP, GIF or AVIF, up to 8 MB. Photos
 straight off a phone are sometimes larger — export a smaller copy.
+
+**Every visitor shows as "Unknown" country.** The IP-to-country list could
+not be downloaded; the Visitors page shows the exact reason at the top. The
+server retries daily, and a restart retries at once. If the URL has changed,
+set `GEOIP_URL` to a list in the same `start_ip,end_ip,country` CSV shape.
+
+**The visitor count seems low.** It counts people, not page loads, and it
+drops bots — which are usually most of a small site's raw traffic. Your own
+visits are counted only when you browse the shop itself, never `/admin`.
 
 ---
 

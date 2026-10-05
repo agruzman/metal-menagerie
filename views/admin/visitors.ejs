@@ -1,0 +1,116 @@
+<%- include('../partials/admin_head', { title: 'Visitors' }) %>
+<%
+  var rangeLabel = range === 0 ? 'all time' : 'last ' + range + ' days';
+  var maxCountry = stats.countries.reduce(function (m, c) { return Math.max(m, c.visitors); }, 0);
+  var maxDay = stats.series.reduce(function (m, d) { return Math.max(m, d.visitors); }, 0);
+  var maxPage = stats.pages.reduce(function (m, p) { return Math.max(m, p.views); }, 0);
+  var pct = function (n, max) { return max ? Math.max(1, Math.round(100 * n / max)) : 0; };
+%>
+
+<div class="toolbar">
+  <h1 style="font-size:1.6rem;margin:0">Visitors</h1>
+  <span class="sp"></span>
+  <a class="btn ghost small <%= range === 7 ? 'on' : '' %>" href="/admin/visitors?range=7">7 days</a>
+  <a class="btn ghost small <%= range === 30 ? 'on' : '' %>" href="/admin/visitors?range=30">30 days</a>
+  <a class="btn ghost small <%= range === 90 ? 'on' : '' %>" href="/admin/visitors?range=90">90 days</a>
+  <a class="btn ghost small <%= range === 0 ? 'on' : '' %>" href="/admin/visitors?range=all">All time</a>
+</div>
+
+<div class="kpis">
+  <div class="kpi"><div class="n"><%= stats.today.visitors %></div><div class="k">Visitors today</div></div>
+  <div class="kpi"><div class="n"><%= stats.week.visitors %></div><div class="k">Last 7 days</div></div>
+  <div class="kpi"><div class="n"><%= stats.month.visitors %></div><div class="k">Last 30 days</div></div>
+  <div class="kpi"><div class="n"><%= stats.all.visitors %></div><div class="k">All time<%= stats.all.since ? ' · since ' + stats.all.since : '' %></div></div>
+  <div class="kpi"><div class="n"><%= stats.totals.views %></div><div class="k">Page views, <%= rangeLabel %></div></div>
+</div>
+
+<% if (!stats.geo.enabled) { %>
+  <div class="notice">Country lookup is switched off (<span class="mono">GEOIP=0</span>), so every visitor is filed under “Unknown”.</div>
+<% } else if (!stats.geo.ready) { %>
+  <div class="notice"><%= stats.geo.error || 'The IP-to-country list is still being fetched — countries will appear within a minute or two of the server starting.' %></div>
+<% } %>
+
+<% if (!stats.all.visitors) { %>
+  <div class="panel">
+    <h2>Nobody yet</h2>
+    <p class="muted">Counting started when this version of the shop went live. Open the shop in a normal browser
+    (not this admin tab) and you will appear here within a few seconds.</p>
+  </div>
+<% } %>
+
+<div class="two">
+  <div class="panel">
+    <h2>Where visitors are — <%= rangeLabel %></h2>
+    <% if (!stats.countries.length) { %>
+      <p class="muted small">Nothing in this period.</p>
+    <% } else { %>
+      <table class="data">
+        <thead><tr><th>Country</th><th class="right">Visitors</th><th class="bars"></th><th class="right">Views</th></tr></thead>
+        <tbody>
+          <% stats.countries.forEach(function (c) { %>
+            <tr>
+              <td><%= c.flag ? c.flag + ' ' : '' %><%= c.name %> <span class="muted small"><%= c.share %>%</span></td>
+              <td class="right"><%= c.visitors %></td>
+              <td class="bars"><span class="bar" style="width:<%= pct(c.visitors, maxCountry) %>%"></span></td>
+              <td class="right muted"><%= c.views %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+
+  <div class="panel">
+    <h2><%= range === 0 ? 'Month by month' : 'Day by day' %></h2>
+    <% if (!stats.series.length) { %>
+      <p class="muted small">Nothing yet.</p>
+    <% } else { %>
+      <table class="data">
+        <thead><tr><th><%= range === 0 ? 'Month' : 'Day' %></th><th class="right">Visitors</th><th class="bars"></th><th class="right">Views</th></tr></thead>
+        <tbody>
+          <% stats.series.slice().reverse().forEach(function (d) { %>
+            <tr>
+              <td class="mono small"><%= d.label %></td>
+              <td class="right"><%= d.visitors %></td>
+              <td class="bars"><% if (d.visitors) { %><span class="bar" style="width:<%= pct(d.visitors, maxDay) %>%"></span><% } %></td>
+              <td class="right muted"><%= d.views %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    <% } %>
+  </div>
+</div>
+
+<div class="panel">
+  <h2>Most viewed pages — <%= rangeLabel %></h2>
+  <% if (!stats.pages.length) { %>
+    <p class="muted small">Nothing in this period.</p>
+  <% } else { %>
+    <table class="data">
+      <thead><tr><th>Page</th><th class="right">Views</th><th class="bars"></th><th></th></tr></thead>
+      <tbody>
+        <% stats.pages.forEach(function (p) { %>
+          <tr>
+            <td><%= p.name %><% if (p.name !== p.path) { %> <span class="mono muted small"><%= p.path %></span><% } %></td>
+            <td class="right"><%= p.views %></td>
+            <td class="bars"><span class="bar soft" style="width:<%= pct(p.views, maxPage) %>%"></span></td>
+            <td class="right"><a class="small" href="<%= p.path %>" target="_blank">open ↗</a></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+</div>
+
+<p class="small muted" style="max-width:760px">
+  How this is counted: a visitor is one browser on one internet address, recognised by a one-way hash — the
+  address itself is never stored and no cookie is set, so no consent banner is needed. One person on two
+  devices counts twice; two people sharing one connection and browser count once. Search engines, link
+  previews, the keep-alive pings and this admin panel are left out. Days run on UTC.
+  <% if (stats.geo.enabled) { %>
+    Countries: <a href="https://db-ip.com" target="_blank" rel="noopener">IP Geolocation by DB-IP</a><% if (stats.geo.ready) { %>, list of <%= stats.geo.rows.toLocaleString('en-US') %> ranges loaded <%= stats.geo.loadedAt.slice(0, 10) %><% } %>.
+  <% } %>
+</p>
+
+<%- include('../partials/admin_foot') %>

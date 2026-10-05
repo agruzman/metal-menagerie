@@ -401,6 +401,12 @@ table.data img.mini { width: 46px; height: 46px; object-fit: cover; border: 1px 
 
 .toolbar { display: flex; gap: 12px; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
 .toolbar .sp { margin-left: auto; }
+.btn.ghost.on { border-color: var(--copper); color: var(--copper-soft); }
+
+/* Visitors page: thin bars behind the numbers */
+.bar { display: block; height: 7px; min-width: 2px; background: var(--copper); border-radius: 2px; opacity: .85; }
+.bar.soft { background: var(--muted); opacity: .5; }
+td.bars { width: 34%; }
 
 /* ------------------------------ responsive ----------------------------- */
 

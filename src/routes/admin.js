@@ -20,6 +20,7 @@ const {
 } = require('../db');
 const { toCents, slugify } = require('../helpers');
 const { sendShippedEmail } = require('../mailer');
+const visits = require('../visits');
 
 const router = express.Router();
 
@@ -106,11 +107,42 @@ router.get('/', (req, res) => {
   const low = Number(settings.low_stock_threshold) || 0; // 0 = warning off
   res.render('admin/dashboard', {
     stats: orders.stats(),
+    visitors: visits.lastWeek(),
     recent: orders.list({ limit: 8 }),
     lowStock: low > 0 ? products.all().filter((p) => p.active && p.stock <= low) : [],
     catalogue: products.all(),
     layoutAdmin: true,
   });
+});
+
+/* ------------------------------- visitors ------------------------------ */
+
+/** Plain-English names for the pages in the "most viewed" table. */
+const PAGE_NAMES = {
+  '/': 'Home',
+  '/shop': 'The collection',
+  '/genka': 'About Genka',
+  '/policies': 'Shipping & returns',
+  '/cart': 'Cart',
+  '/order/details': 'Order form',
+  '/order/success': 'Order sent (thank-you page)',
+};
+
+function pageName(p) {
+  if (PAGE_NAMES[p]) return PAGE_NAMES[p];
+  const m = /^\/product\/([^/]+)$/.exec(p);
+  if (m) {
+    const product = products.bySlug(m[1]);
+    return product ? product.name : p;
+  }
+  return p;
+}
+
+router.get('/visitors', (req, res) => {
+  const range = req.query.range === 'all' ? 0 : Number(req.query.range) || 30;
+  const stats = visits.stats(range);
+  stats.pages = stats.pages.map((p) => ({ ...p, name: pageName(p.path) }));
+  res.render('admin/visitors', { stats, range: stats.range, layoutAdmin: true });
 });
 
 /* ------------------------------- products ------------------------------ */
